@@ -1,6 +1,6 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'User Dashboard')
+@section('title', 'Staff Dashboard')
 
 @section('page-style')
 <style>
@@ -365,6 +365,7 @@
                 <tr>
                     <th>Time</th>
                     <th>Hall</th>
+                    <th>Staff</th>
                     <th>Event</th>
                 </tr>
             `;
@@ -385,8 +386,12 @@
                 const eventCell = document.createElement('td');
                 eventCell.textContent = booking.event_name;
 
+                const staffCell = document.createElement('td');
+                staffCell.textContent = booking.booked_by;
+
                 row.appendChild(timeCell);
                 row.appendChild(hallCell);
+                row.appendChild(staffCell);
                 row.appendChild(eventCell);
                 tbody.appendChild(row);
             });
@@ -433,8 +438,8 @@
                     dayBookings.forEach(function (booking) {
                         const eventLine = document.createElement('div');
                         eventLine.className = 'calendar-event';
-                        eventLine.title = `${booking.start_time}-${booking.end_time} ${booking.event_name} (${booking.hall_name})`;
-                        eventLine.textContent = `${booking.start_time}-${booking.end_time} ${booking.event_name} - ${booking.hall_name}`;
+                        eventLine.title = `${booking.start_time}-${booking.end_time} | ${booking.booked_by} | ${booking.event_name} (${booking.hall_name})`;
+                        eventLine.textContent = `${booking.start_time}-${booking.end_time} - ${booking.booked_by} - ${booking.event_name}`;
                         eventsWrap.appendChild(eventLine);
                     });
 

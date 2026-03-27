@@ -28,7 +28,7 @@ class DashboardController extends Controller
 
         $myBookingsQuery = Booking::query();
         $upcomingBookingsQuery = Booking::query();
-        $calendarBookingsQuery = Booking::with('hall')
+        $calendarBookingsQuery = Booking::with(['hall', 'customer', 'user'])
             ->whereNotNull('event_date');
 
         if ($ownerColumn) {
@@ -86,6 +86,7 @@ class DashboardController extends Controller
                         'end_time' => $formatTime($booking->end_time),
                         'event_name' => $booking->event_name ?: 'Event',
                         'hall_name' => optional($booking->hall)->name ?: 'Hall',
+                        'booked_by' => $booking->coordinator_name ?: (optional($booking->customer)->name ?: (optional($booking->user)->name ?: 'N/A')),
                     ];
                 })
                 ->values(),

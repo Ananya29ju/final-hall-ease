@@ -1,6 +1,6 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Add User Account')
+@section('title', 'Add Staff Account')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -8,7 +8,7 @@
         <div class="col-md-8 offset-md-2">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title">Create New User Account</h5>
+                    <h5 class="card-title">Create New Staff Account</h5>
                 </div>
                 <form action="{{ route('admin.staff.store-user') }}" method="POST">
                     @csrf
@@ -57,7 +57,7 @@
                     </div>
                     <div class="card-footer">
                         <a href="{{ route('admin.staff.index') }}" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Create User</button>
+                        <button type="submit" class="btn btn-primary">Create Staff</button>
                     </div>
                 </form>
             </div>

@@ -60,7 +60,7 @@ class StaffController extends Controller
 
         return redirect()
             ->route('admin.staff.index')
-            ->with('success', 'Staff member added successfully!');
+            ->with('success', 'Admin account added successfully!');
     }
 
     /**
@@ -86,7 +86,7 @@ class StaffController extends Controller
 
         return redirect()
             ->route('admin.staff.index')
-            ->with('success', 'User account created successfully!');
+            ->with('success', 'Staff account created successfully!');
     }
 
     /**

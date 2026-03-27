@@ -1,6 +1,6 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Staff Management')
+@section('title', 'Admin & Staff Management')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -8,13 +8,13 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">Staff & User Accounts</h5>
+                    <h5 class="card-title">Admin & Staff Accounts</h5>
                     <div class="d-flex gap-2">
                         <a href="{{ route('admin.staff.create') }}" class="btn btn-primary">
-                            <i class="bx bx-plus"></i> Add Staff
+                            <i class="bx bx-plus"></i> Add Admin
                         </a>
                         <a href="{{ route('admin.staff.create-user') }}" class="btn btn-outline-primary">
-                            <i class="bx bx-user-plus"></i> Add User
+                            <i class="bx bx-user-plus"></i> Add Staff
                         </a>
                     </div>
                 </div>
@@ -37,9 +37,9 @@
                                     <td>{{ $member->email }}</td>
                                     <td>
                                         @if ($member->role === 'admin')
-                                            <span class="badge bg-label-primary">Staff</span>
+                                            <span class="badge bg-label-primary">Admin</span>
                                         @else
-                                            <span class="badge bg-label-info">User</span>
+                                            <span class="badge bg-label-info">Staff</span>
                                         @endif
                                     </td>
                                     <td>{{ $member->phone ?? 'N/A' }}</td>

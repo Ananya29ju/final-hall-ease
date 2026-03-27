@@ -18,7 +18,7 @@ class DashboardController extends Controller
     public function index()
     {
         $bookingsTable = (new Booking())->getTable();
-        $calendarQuery = Booking::with('hall')
+        $calendarQuery = Booking::with(['hall', 'customer', 'user'])
             ->whereNotNull('event_date');
 
         if (Schema::hasColumn($bookingsTable, 'cancellation_reason')) {
@@ -51,6 +51,7 @@ class DashboardController extends Controller
                     'end_time' => $formatTime($booking->end_time),
                     'event_name' => $booking->event_name ?: 'Event',
                     'hall_name' => optional($booking->hall)->name ?: 'Hall',
+                    'booked_by' => $booking->coordinator_name ?: (optional($booking->customer)->name ?: (optional($booking->user)->name ?: 'N/A')),
                 ];
             })
             ->values();

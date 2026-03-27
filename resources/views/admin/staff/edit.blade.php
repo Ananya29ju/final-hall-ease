@@ -1,6 +1,6 @@
 @extends('layouts/contentNavbarLayout')
 
-@section('title', 'Edit Staff')
+@section('title', 'Edit Account')
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -8,7 +8,7 @@
         <div class="col-md-8 offset-md-2">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title">Edit Staff Member</h5>
+                    <h5 class="card-title">Edit Account ({{ $staff->role === 'admin' ? 'Admin' : 'Staff' }})</h5>
                 </div>
                 <form action="{{ route('admin.staff.update', $staff) }}" method="POST">
                     @csrf
@@ -40,7 +40,7 @@
                     </div>
                     <div class="card-footer">
                         <a href="{{ route('admin.staff.index') }}" class="btn btn-secondary">Back</a>
-                        <button type="submit" class="btn btn-primary">Update Staff</button>
+                        <button type="submit" class="btn btn-primary">Update Account</button>
                     </div>
                 </form>
             </div>

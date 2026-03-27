@@ -152,8 +152,8 @@
                             <span class="d-block text-muted text-uppercase font-weight-bold" style="font-size: 0.75rem;">Total Halls</span>
                             <h3 class="mb-0 mt-2">{{ $total_halls }}</h3>
                         </div>
-                        <div class="text-center" style="background: white; padding: 12px 15px; border-radius: 8px;">
-                            <i class="bx bx-buildings" style="font-size: 2.5rem; color: #0d6efd;"></i>
+                        <div class="stat-icon-purple">
+                            <i class="bx bx-buildings"></i>
                         </div>
                     </div>
                 </div>
@@ -164,11 +164,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <span class="d-block text-muted text-uppercase font-weight-bold" style="font-size: 0.75rem;">Total Users</span>
+                            <span class="d-block text-muted text-uppercase font-weight-bold" style="font-size: 0.75rem;">Total Staff</span>
                             <h3 class="mb-0 mt-2">{{ $total_users }}</h3>
                         </div>
-                        <div class="text-center" style="background: white; padding: 12px 15px; border-radius: 8px;">
-                            <i class="bx bx-user-circle" style="font-size: 2.5rem; color: #198754;"></i>
+                        <div class="stat-icon-green">
+                            <i class="bx bx-user-circle"></i>
                         </div>
                     </div>
                 </div>
@@ -182,8 +182,8 @@
                             <span class="d-block text-muted text-uppercase font-weight-bold" style="font-size: 0.75rem;">Total Bookings</span>
                             <h3 class="mb-0 mt-2">{{ $total_bookings }}</h3>
                         </div>
-                        <div class="text-center" style="background: white; padding: 12px 15px; border-radius: 8px;">
-                            <i class="bx bx-calendar-event" style="font-size: 2.5rem; color: #0dcaf0;"></i>
+                        <div class="stat-icon-cyan">
+                            <i class="bx bx-calendar-event"></i>
                         </div>
                     </div>
                 </div>
@@ -197,8 +197,8 @@
                             <span class="d-block text-muted text-uppercase font-weight-bold" style="font-size: 0.75rem;">Total Events</span>
                             <h3 class="mb-0 mt-2">{{ $total_events }}</h3>
                         </div>
-                        <div class="text-center" style="background: white; padding: 12px 15px; border-radius: 8px;">
-                            <i class="bx bx-party" style="font-size: 2.5rem; color: #6f42c1;"></i>
+                        <div class="stat-icon-orange">
+                            <i class="bx bx-party"></i>
                         </div>
                     </div>
                 </div>
@@ -334,7 +334,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">All User Bookings</h5>
+                    <h5 class="mb-0">All Staff Bookings</h5>
                     <span class="badge bg-primary">{{ $all_user_bookings->count() }}</span>
                 </div>
                 <div class="card-body">
@@ -343,7 +343,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>User</th>
+                                    <th>Staff</th>
                                     <th>Hall</th>
                                     <th>Event</th>
                                     <th>Date</th>
@@ -362,7 +362,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted">No user bookings found.</td>
+                                        <td colspan="6" class="text-center text-muted">No staff bookings found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -467,6 +467,7 @@
                 <tr>
                     <th>Time</th>
                     <th>Hall</th>
+                    <th>Staff</th>
                     <th>Event</th>
                 </tr>
             `;
@@ -487,8 +488,12 @@
                 const eventCell = document.createElement('td');
                 eventCell.textContent = booking.event_name;
 
+                const staffCell = document.createElement('td');
+                staffCell.textContent = booking.booked_by;
+
                 row.appendChild(timeCell);
                 row.appendChild(hallCell);
+                row.appendChild(staffCell);
                 row.appendChild(eventCell);
                 tbody.appendChild(row);
             });
@@ -535,8 +540,8 @@
                     dayBookings.forEach(function (booking) {
                         const eventLine = document.createElement('div');
                         eventLine.className = 'calendar-event';
-                        eventLine.title = `${booking.start_time}-${booking.end_time} ${booking.event_name} (${booking.hall_name})`;
-                        eventLine.textContent = `${booking.start_time}-${booking.end_time} ${booking.event_name} - ${booking.hall_name}`;
+                        eventLine.title = `${booking.start_time}-${booking.end_time} | ${booking.booked_by} | ${booking.event_name} (${booking.hall_name})`;
+                        eventLine.textContent = `${booking.start_time}-${booking.end_time} - ${booking.booked_by} - ${booking.event_name}`;
                         eventsWrap.appendChild(eventLine);
                     });
 

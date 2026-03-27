@@ -74,7 +74,7 @@ Route::middleware('guest')->group(function () {
 // ============================================
 // PROTECTED ADMIN ROUTES
 // ============================================
-Route::middleware(['auth'])
+Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -120,9 +120,9 @@ Route::middleware(['auth'])
     });
 
 // ============================================
-// PROTECTED USER ROUTES
+// PROTECTED USER (STAFF) ROUTES
 // ============================================
-Route::middleware(['auth'])
+Route::middleware(['auth', 'staff'])
     ->prefix('user')
     ->name('user.')
     ->group(function () {

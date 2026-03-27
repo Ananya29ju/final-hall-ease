@@ -25,6 +25,19 @@ $userInitial = strtoupper(substr(Auth::user()->name ?? 'U', 0, 1));
 
 <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
     <ul class="navbar-nav flex-row align-items-center w-100">
+        <!-- Search Icon -->
+        <li class="nav-item me-2">
+            <a class="nav-link" href="javascript:void(0);">
+                <i class="bx bx-search icon-md navbar-search-icon"></i>
+            </a>
+        </li>
+        <!-- Expand Icon -->
+        <li class="nav-item me-2">
+            <a class="nav-link" href="javascript:void(0);" onclick="toggleFullScreen()">
+                <i class="bx bx-expand icon-md navbar-search-icon"></i>
+            </a>
+        </li>
+
         @forelse (collect($campus_groups ?? []) as $campusName => $blocks)
             <li class="nav-item dropdown me-2">
                 <a class="nav-link dropdown-toggle" href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -45,16 +58,13 @@ $userInitial = strtoupper(substr(Auth::user()->name ?? 'U', 0, 1));
                 </ul>
             </li>
         @empty
-            <li class="nav-item me-3">
-                <span class="nav-link text-muted">No campuses added yet</span>
-            </li>
         @endforelse
 
         <!-- User -->
         <li class="nav-item navbar-dropdown dropdown-user dropdown ms-auto">
             <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
                 <div class="avatar avatar-online">
-                    <span class="w-px-40 h-px-40 rounded-circle d-flex align-items-center justify-content-center fw-semibold text-white bg-primary">
+                    <span class="w-px-40 h-px-40 rounded-circle d-flex align-items-center justify-content-center fw-semibold text-white" style="background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5);">
                         {{ $userInitial }}
                     </span>
                 </div>
@@ -106,3 +116,13 @@ $userInitial = strtoupper(substr(Auth::user()->name ?? 'U', 0, 1));
         <!--/ User -->
     </ul>
 </div>
+
+<script>
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+    }
+}
+</script>
