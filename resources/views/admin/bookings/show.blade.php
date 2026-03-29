@@ -29,6 +29,20 @@
                             <td><strong>{{ $booking->start_time }} - {{ $booking->end_time }}</strong></td>
                         </tr>
                         <tr>
+                            <td class="text-muted">Status</td>
+                            <td>
+                                @php
+                                    $statusClass = match ($booking->booking_status ?? 'pending') {
+                                        'confirmed' => 'success',
+                                        'completed' => 'secondary',
+                                        'cancelled' => 'danger',
+                                        default => 'warning',
+                                    };
+                                @endphp
+                                <span class="badge bg-label-{{ $statusClass }}">{{ ucfirst($booking->booking_status ?? 'pending') }}</span>
+                            </td>
+                        </tr>
+                        <tr>
                             <td class="text-muted">Resources</td>
                             <td>
                                 @php
@@ -54,6 +68,21 @@
                     </table>
                 </div>
                 <div class="card-footer">
+                    @if (($booking->booking_status ?? 'pending') === 'pending')
+                        <form action="{{ route('admin.bookings.updateStatus', $booking) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="booking_status" value="confirmed">
+                            <button type="submit" class="btn btn-success">Approve Booking</button>
+                        </form>
+                        <form action="{{ route('admin.bookings.updateStatus', $booking) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="booking_status" value="cancelled">
+                            <input type="hidden" name="cancellation_reason" value="Rejected by admin">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this booking?')">Reject Booking</button>
+                        </form>
+                    @endif
                     <a href="{{ route('admin.bookings.edit', $booking) }}" class="btn btn-primary">Edit</a>
                     <a href="{{ route('admin.bookings.index') }}" class="btn btn-secondary">Back</a>
                 </div>

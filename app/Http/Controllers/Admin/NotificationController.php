@@ -15,8 +15,12 @@ class NotificationController extends Controller
     {
         $bookingsTable = (new Booking())->getTable();
         $hasCancellationReason = Schema::hasColumn($bookingsTable, 'cancellation_reason');
+        $hasBookingStatus = Schema::hasColumn($bookingsTable, 'booking_status');
 
         $newBookingsQuery = Booking::with(['hall', 'customer', 'user']);
+        if ($hasBookingStatus) {
+            $newBookingsQuery->where('booking_status', 'pending');
+        }
         if ($hasCancellationReason) {
             $newBookingsQuery->where(function ($query) {
                 $query->whereNull('cancellation_reason')
@@ -31,6 +35,9 @@ class NotificationController extends Controller
         $cancellationNotifications = collect();
         if ($hasCancellationReason) {
             $cancellationNotifications = Booking::with(['hall', 'customer', 'user'])
+                ->when($hasBookingStatus, function ($query) {
+                    $query->where('booking_status', 'cancelled');
+                })
                 ->whereNotNull('cancellation_reason')
                 ->where('cancellation_reason', '!=', '')
                 ->latest()

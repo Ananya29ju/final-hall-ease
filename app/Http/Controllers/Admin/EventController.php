@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class EventController extends Controller
 {
@@ -13,7 +14,13 @@ class EventController extends Controller
      */
     public function index()
     {
-        $events = Booking::with(['user', 'customer', 'hall'])
+        $eventsQuery = Booking::with(['user', 'customer', 'hall']);
+
+        if (Schema::hasColumn((new Booking())->getTable(), 'booking_status')) {
+            $eventsQuery->whereIn('booking_status', ['pending', 'confirmed', 'completed']);
+        }
+
+        $events = $eventsQuery
             ->latest('event_date')
             ->latest('start_time')
             ->paginate(10);

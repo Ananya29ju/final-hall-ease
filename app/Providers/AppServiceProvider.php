@@ -65,6 +65,10 @@ class AppServiceProvider extends ServiceProvider
                 $newBookingsQuery = Booking::query();
                 $cancellationCount = 0;
 
+                 if (Schema::hasColumn($bookingsTable, 'booking_status')) {
+                    $newBookingsQuery->where('booking_status', 'pending');
+                }
+
                 if (Schema::hasColumn($bookingsTable, 'cancellation_reason')) {
                     $newBookingsQuery->where(function ($query) {
                         $query->whereNull('cancellation_reason')
@@ -72,6 +76,9 @@ class AppServiceProvider extends ServiceProvider
                     });
 
                     $cancellationCount = Booking::query()
+                        ->when(Schema::hasColumn($bookingsTable, 'booking_status'), function ($query) {
+                            $query->where('booking_status', 'cancelled');
+                        })
                         ->whereNotNull('cancellation_reason')
                         ->where('cancellation_reason', '!=', '')
                         ->count();
@@ -82,6 +89,30 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $view->with('admin_notification_count', $notificationCount);
+        });
+
+        View::composer('layouts.sections.menu.mediaVerticalMenu', function ($view) {
+            $notificationCount = 0;
+            $bookingsTable = (new Booking())->getTable();
+
+            if (Schema::hasTable($bookingsTable) && Auth::check()) {
+                $newBookingsQuery = Booking::query();
+
+                if (Schema::hasColumn($bookingsTable, 'booking_status')) {
+                    $newBookingsQuery->where('booking_status', 'confirmed');
+                }
+
+                if (Schema::hasColumn($bookingsTable, 'cancellation_reason')) {
+                    $newBookingsQuery->where(function ($query) {
+                        $query->whereNull('cancellation_reason')
+                            ->orWhere('cancellation_reason', '');
+                    });
+                }
+
+                $notificationCount = $newBookingsQuery->count();
+            }
+
+            $view->with('media_notification_count', $notificationCount);
         });
     }
 }

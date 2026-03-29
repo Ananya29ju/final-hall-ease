@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Media\DashboardController as MediaDashboardController;
+use App\Http\Controllers\Media\NotificationController as MediaNotificationController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\User\HallController as UserHallController;
 use App\Http\Controllers\User\BookingController as UserBookingController;
@@ -135,6 +137,17 @@ Route::middleware(['auth', 'staff'])
         Route::get('bookings/cancel', [UserBookingController::class, 'showCancellationForm'])->name('bookings.cancel.form');
         Route::post('bookings/cancel', [UserBookingController::class, 'cancel'])->name('bookings.cancel.submit');
         Route::get('notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
+    });
+
+// ============================================
+// PROTECTED MEDIA ROUTES
+// ============================================
+Route::middleware(['auth', 'media'])
+    ->prefix('media')
+    ->name('media.')
+    ->group(function () {
+        Route::get('dashboard', [MediaDashboardController::class, 'index'])->name('dashboard');
+        Route::get('notifications', [MediaNotificationController::class, 'index'])->name('notifications.index');
     });
 
 // ============================================

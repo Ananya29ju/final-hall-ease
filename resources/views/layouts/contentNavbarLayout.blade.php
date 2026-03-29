@@ -39,6 +39,8 @@ $container = ($container ?? 'container-xxl');
         @if ($isMenu)
             @if (request()->is('admin/*'))
                 @include('layouts/sections/menu/verticalMenu')
+            @elseif (auth()->check() && (auth()->user()->role ?? 'user') === 'media')
+                @include('layouts/sections/menu/mediaVerticalMenu')
             @elseif (auth()->check() && (auth()->user()->role ?? 'user') === 'user')
                 @include('layouts/sections/menu/userVerticalMenu')
             @else

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class StaffController extends Controller
@@ -14,11 +15,19 @@ class StaffController extends Controller
      */
     public function index()
     {
-        $staff = User::whereIn('role', ['admin', 'user'])
+        $admins = User::where('role', 'admin')
             ->latest()
-            ->paginate(10);
+            ->paginate(10, ['*'], 'admins_page');
 
-        return view('admin.staff.index', compact('staff'));
+        $staffMembers = User::where('role', 'user')
+            ->latest()
+            ->paginate(10, ['*'], 'staff_page');
+
+        $mediaMembers = User::where('role', 'media')
+            ->latest()
+            ->paginate(10, ['*'], 'media_page');
+
+        return view('admin.staff.index', compact('admins', 'staffMembers', 'mediaMembers'));
     }
 
     /**
@@ -73,6 +82,7 @@ class StaffController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:6|confirmed',
+            'role' => 'required|in:user,media',
         ]);
 
         User::create([
@@ -80,13 +90,13 @@ class StaffController extends Controller
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
-            'role' => 'user',
+            'role' => $validated['role'],
             'email_verified_at' => now(),
         ]);
 
         return redirect()
             ->route('admin.staff.index')
-            ->with('success', 'Staff account created successfully!');
+            ->with('success', $this->roleLabel($validated['role']) . ' account created successfully!');
     }
 
     /**
@@ -114,13 +124,44 @@ class StaffController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $staff->id,
             'phone' => 'nullable|string|max:20',
+            'role' => 'required|in:admin,user,media',
         ]);
 
         $staff->update($validated);
 
+        if (Auth::id() === $staff->id) {
+            session()->flash('success', 'Your account was updated successfully.');
+
+            return redirect()->route($this->dashboardRouteForRole($staff->role));
+        }
+
         return redirect()
             ->route('admin.staff.index')
-            ->with('success', 'Staff member updated successfully!');
+            ->with('success', 'Account updated successfully!');
+    }
+
+    /**
+     * Resolve the dashboard route name for the given role.
+     */
+    private function dashboardRouteForRole(string $role): string
+    {
+        return match ($role) {
+            'admin' => 'admin.dashboard',
+            'media' => 'media.dashboard',
+            default => 'user.dashboard',
+        };
+    }
+
+    /**
+     * Resolve a friendly label for the given role.
+     */
+    private function roleLabel(string $role): string
+    {
+        return match ($role) {
+            'user' => 'Staff',
+            'media' => 'Media',
+            default => ucfirst($role),
+        };
     }
 
     /**

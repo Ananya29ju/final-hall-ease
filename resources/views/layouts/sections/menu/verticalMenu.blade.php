@@ -18,7 +18,7 @@
     <div class="menu-divider mt-0"></div>
     <div class="menu-inner-shadow"></div>
 
-    <ul class="menu-inner py-1">
+    <ul class="menu-inner py-1 d-flex flex-column h-100">
 
         {{-- Dashboard --}}
         <li class="menu-item mb-2 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -108,6 +108,16 @@
                 <i class="menu-icon tf-icons bx bx-cog"></i>
                 <div>Settings</div>
             </a>
+        </li>
+
+        <li class="menu-item mb-2 mt-auto">
+            <a href="{{ route('logout') }}" class="menu-link" onclick="event.preventDefault(); document.getElementById('admin-sidebar-logout-form').submit();">
+                <i class="menu-icon tf-icons bx bx-log-out"></i>
+                <div>Logout</div>
+            </a>
+            <form id="admin-sidebar-logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                @csrf
+            </form>
         </li>
 
     </ul>

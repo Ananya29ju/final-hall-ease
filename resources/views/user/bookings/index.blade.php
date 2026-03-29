@@ -41,6 +41,7 @@
                 echo '<td>' . e($booking->event_name ?? 'N/A') . '</td>';
                 echo '<td>' . e(optional($booking->event_date)->format('M d, Y')) . '</td>';
                 echo '<td>' . e(\Carbon\Carbon::parse($booking->start_time)->format('H:i')) . ' - ' . e(\Carbon\Carbon::parse($booking->end_time)->format('H:i')) . '</td>';
+                echo '<td>' . e(ucfirst($booking->booking_status ?? 'pending')) . '</td>';
                 echo '<td>' . e($resourcesText) . '</td>';
                 if ($showCancellationReason) {
                     echo '<td>' . e($booking->cancellation_reason ?? '-') . '</td>';
@@ -66,6 +67,7 @@
                             <th>Event Name</th>
                             <th>Date</th>
                             <th>Time</th>
+                            <th>Status</th>
                             <th>Resources</th>
                             <th>Created On</th>
                         </tr>
@@ -73,7 +75,7 @@
                     <tbody>
                         @if($upcomingBookings->isEmpty())
                             <tr>
-                                <td colspan="7" class="text-center text-muted">No upcoming bookings.</td>
+                                <td colspan="8" class="text-center text-muted">No upcoming bookings.</td>
                             </tr>
                         @else
                             {!! $renderRows($upcomingBookings) !!}
@@ -99,6 +101,7 @@
                             <th>Event Name</th>
                             <th>Date</th>
                             <th>Time</th>
+                            <th>Status</th>
                             <th>Resources</th>
                             <th>Created On</th>
                         </tr>
@@ -106,7 +109,7 @@
                     <tbody>
                         @if($completedBookings->isEmpty())
                             <tr>
-                                <td colspan="7" class="text-center text-muted">No completed bookings.</td>
+                                <td colspan="8" class="text-center text-muted">No completed bookings.</td>
                             </tr>
                         @else
                             {!! $renderRows($completedBookings) !!}
@@ -132,6 +135,7 @@
                             <th>Event Name</th>
                             <th>Date</th>
                             <th>Time</th>
+                            <th>Status</th>
                             <th>Resources</th>
                             <th>Cancellation Reason</th>
                             <th>Created On</th>
@@ -140,7 +144,7 @@
                     <tbody>
                         @if($cancelledBookings->isEmpty())
                             <tr>
-                                <td colspan="8" class="text-center text-muted">No cancelled bookings.</td>
+                                <td colspan="9" class="text-center text-muted">No cancelled bookings.</td>
                             </tr>
                         @else
                             {!! $renderRows($cancelledBookings, true) !!}

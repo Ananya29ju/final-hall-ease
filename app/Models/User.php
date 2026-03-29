@@ -34,6 +34,17 @@ class User extends Authenticatable
     {
         return strtolower((string) $this->role) === 'admin';
     }
+
+    public function isStaff()
+    {
+        return strtolower((string) $this->role) === 'user';
+    }
+
+    public function isMedia()
+    {
+        return strtolower((string) $this->role) === 'media';
+    }
+
     public function createdBookings()
     {
         return $this->hasMany(Booking::class, 'created_by');

@@ -25,6 +25,9 @@ class BookingController extends Controller
 
         $upcomingQuery = clone $baseQuery;
         $upcomingQuery->whereDate('event_date', '>=', $today);
+        if (Schema::hasColumn($bookingsTable, 'booking_status')) {
+            $upcomingQuery->where('booking_status', '!=', 'cancelled');
+        }
         if ($hasCancellationReason) {
             $upcomingQuery->where(function ($query) {
                 $query->whereNull('cancellation_reason')
@@ -34,6 +37,9 @@ class BookingController extends Controller
 
         $completedQuery = clone $baseQuery;
         $completedQuery->whereDate('event_date', '<', $today);
+        if (Schema::hasColumn($bookingsTable, 'booking_status')) {
+            $completedQuery->where('booking_status', '!=', 'cancelled');
+        }
         if ($hasCancellationReason) {
             $completedQuery->where(function ($query) {
                 $query->whereNull('cancellation_reason')
@@ -42,7 +48,9 @@ class BookingController extends Controller
         }
 
         $cancelledQuery = clone $baseQuery;
-        if ($hasCancellationReason) {
+        if (Schema::hasColumn($bookingsTable, 'booking_status')) {
+            $cancelledQuery->where('booking_status', 'cancelled');
+        } elseif ($hasCancellationReason) {
             $cancelledQuery->whereNotNull('cancellation_reason')
                 ->where('cancellation_reason', '!=', '');
         } else {
@@ -133,6 +141,7 @@ class BookingController extends Controller
             'event_date' => $request->event_date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
+            'booking_status' => 'confirmed',
             'event_name' => $request->event_name,
             'event_department' => $request->event_department,
             'event_type' => $request->event_type,
@@ -182,6 +191,7 @@ class BookingController extends Controller
             'event_date' => 'required|date',
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
+            'booking_status' => 'nullable|in:pending,confirmed,cancelled,completed',
             'cancellation_reason' => 'nullable|string',
             'resources' => 'nullable|array',
             'resources.*' => 'in:projectors,sound_systems,lighting,seating,other',
@@ -203,7 +213,10 @@ class BookingController extends Controller
             'event_date' => $request->event_date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
-            'cancellation_reason' => $request->cancellation_reason,
+            'booking_status' => $request->booking_status ?? $booking->booking_status,
+            'cancellation_reason' => ($request->booking_status ?? $booking->booking_status) === 'cancelled'
+                ? $request->cancellation_reason
+                : null,
             'resources' => $request->input('resources', []),
             'resources_other' => $request->resources_other,
         ]);
@@ -229,14 +242,18 @@ class BookingController extends Controller
     public function updateStatus(Request $request, Booking $booking)
     {
         $request->validate([
+            'booking_status' => 'required|in:pending,confirmed,cancelled,completed',
             'cancellation_reason' => 'nullable|string',
         ]);
 
         $booking->update([
-            'cancellation_reason' => $request->cancellation_reason ?? null
+            'booking_status' => $request->booking_status,
+            'cancellation_reason' => $request->booking_status === 'cancelled'
+                ? ($request->cancellation_reason ?: 'Cancelled by admin')
+                : null,
         ]);
 
-        return back()->with('success', 'Booking updated.');
+        return back()->with('success', 'Booking status updated.');
     }
 
     /**
@@ -294,6 +311,7 @@ class BookingController extends Controller
         }
 
         $booking->update([
+            'booking_status' => 'cancelled',
             'cancellation_reason' => $reasonText,
         ]);
 

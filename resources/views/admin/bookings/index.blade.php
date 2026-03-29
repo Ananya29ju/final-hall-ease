@@ -29,6 +29,15 @@
                 'other' => 'Other',
             ];
 
+            $statusBadge = function ($status) {
+                return match ($status) {
+                    'confirmed' => 'success',
+                    'completed' => 'secondary',
+                    'cancelled' => 'danger',
+                    default => 'warning',
+                };
+            };
+
             foreach ($bookings as $booking) {
                 $resources = collect($booking->resources ?? [])
                     ->map(fn ($value) => $resourceLabels[$value] ?? ucfirst(str_replace('_', ' ', $value)))
@@ -45,11 +54,28 @@
                 echo '<td>' . e(optional($booking->customer)->name ?? optional($booking->user)->name ?? 'N/A') . '</td>';
                 echo '<td>' . e(optional($booking->event_date)->format('M d, Y')) . '</td>';
                 echo '<td>' . e(\Carbon\Carbon::parse($booking->start_time)->format('H:i')) . ' - ' . e(\Carbon\Carbon::parse($booking->end_time)->format('H:i')) . '</td>';
+                echo '<td><span class="badge bg-label-' . e($statusBadge($booking->booking_status ?? 'pending')) . '">' . e(ucfirst($booking->booking_status ?? 'pending')) . '</span></td>';
                 echo '<td>' . e($resourcesText) . '</td>';
                 if ($isCancelled) {
                     echo '<td>' . e($booking->cancellation_reason ?? '-') . '</td>';
                 }
                 echo '<td>';
+                if (($booking->booking_status ?? 'pending') === 'pending') {
+                    echo '<form action="' . e(route('admin.bookings.updateStatus', $booking->id)) . '" method="POST" class="d-inline me-1">';
+                    echo csrf_field();
+                    echo method_field('PATCH');
+                    echo '<input type="hidden" name="booking_status" value="confirmed">';
+                    echo '<button class="btn btn-sm btn-success" title="Approve booking"><i class="bx bx-check"></i></button>';
+                    echo '</form>';
+
+                    echo '<form action="' . e(route('admin.bookings.updateStatus', $booking->id)) . '" method="POST" class="d-inline me-1">';
+                    echo csrf_field();
+                    echo method_field('PATCH');
+                    echo '<input type="hidden" name="booking_status" value="cancelled">';
+                    echo '<input type="hidden" name="cancellation_reason" value="Rejected by admin">';
+                    echo '<button class="btn btn-sm btn-danger" title="Reject booking" onclick="return confirm(\'Reject this booking?\')"><i class="bx bx-x"></i></button>';
+                    echo '</form>';
+                }
                 echo '<a href="' . e(route('admin.bookings.show', $booking->id)) . '" class="btn btn-sm btn-info me-1"><i class="bx bx-show"></i></a>';
                 echo '<a href="' . e(route('admin.bookings.edit', $booking->id)) . '" class="btn btn-sm btn-warning me-1"><i class="bx bx-edit"></i></a>';
                 echo '<form action="' . e(route('admin.bookings.destroy', $booking->id)) . '" method="POST" class="d-inline">';
@@ -78,6 +104,7 @@
                             <th>Staff</th>
                             <th>Date</th>
                             <th>Time</th>
+                            <th>Status</th>
                             <th>Resources</th>
                             <th>Actions</th>
                         </tr>
@@ -85,7 +112,7 @@
                     <tbody>
                         @if($upcomingBookings->isEmpty())
                             <tr>
-                                <td colspan="7" class="text-center text-muted">No upcoming bookings.</td>
+                                <td colspan="8" class="text-center text-muted">No upcoming bookings.</td>
                             </tr>
                         @else
                             {!! $renderRows($upcomingBookings) !!}
@@ -111,6 +138,7 @@
                             <th>Staff</th>
                             <th>Date</th>
                             <th>Time</th>
+                            <th>Status</th>
                             <th>Resources</th>
                             <th>Actions</th>
                         </tr>
@@ -118,7 +146,7 @@
                     <tbody>
                         @if($completedBookings->isEmpty())
                             <tr>
-                                <td colspan="7" class="text-center text-muted">No completed bookings.</td>
+                                <td colspan="8" class="text-center text-muted">No completed bookings.</td>
                             </tr>
                         @else
                             {!! $renderRows($completedBookings) !!}
@@ -144,6 +172,7 @@
                             <th>Staff</th>
                             <th>Date</th>
                             <th>Time</th>
+                            <th>Status</th>
                             <th>Resources</th>
                             <th>Cancellation Reason</th>
                             <th>Actions</th>
@@ -152,7 +181,7 @@
                     <tbody>
                         @if($cancelledBookings->isEmpty())
                             <tr>
-                                <td colspan="8" class="text-center text-muted">No cancelled bookings.</td>
+                                <td colspan="9" class="text-center text-muted">No cancelled bookings.</td>
                             </tr>
                         @else
                             {!! $renderRows($cancelledBookings, true) !!}

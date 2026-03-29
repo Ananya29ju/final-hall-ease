@@ -8,7 +8,7 @@
         <div class="col-md-8 offset-md-2">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title">Edit Account ({{ $staff->role === 'admin' ? 'Admin' : 'Staff' }})</h5>
+                    <h5 class="card-title">Edit Account ({{ ucfirst($staff->role === 'user' ? 'staff' : $staff->role) }})</h5>
                 </div>
                 <form action="{{ route('admin.staff.update', $staff) }}" method="POST">
                     @csrf
@@ -36,6 +36,19 @@
                             @error('phone')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="role" class="form-label">Account Type *</label>
+                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
+                                <option value="admin" {{ old('role', $staff->role) === 'admin' ? 'selected' : '' }}>Admin</option>
+                                <option value="user" {{ old('role', $staff->role) === 'user' ? 'selected' : '' }}>Staff</option>
+                                <option value="media" {{ old('role', $staff->role) === 'media' ? 'selected' : '' }}>Media</option>
+                            </select>
+                            @error('role')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Use this to promote staff to admin or change an admin back to staff.</small>
                         </div>
                     </div>
                     <div class="card-footer">

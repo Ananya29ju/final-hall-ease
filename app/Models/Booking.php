@@ -17,6 +17,7 @@ class Booking extends Model
         'event_date',
         'start_time',
         'end_time',
+        'booking_status',
         'event_name',
         'event_department',
         'event_type',

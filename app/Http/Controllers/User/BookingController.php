@@ -178,6 +178,7 @@ class BookingController extends Controller
             'event_date' => $request->event_date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
+            'booking_status' => 'pending',
             'event_name' => $request->event_name,
             'event_department' => $request->event_department,
             'event_type' => $request->event_type,
