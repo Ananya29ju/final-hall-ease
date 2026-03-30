@@ -533,7 +533,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let isSlotAvailable = false;
     let hasCheckedAvailability = false;
 
-    // Prevent form submission if slot is not available
+    // Set min date to today to prevent past date selection
+    const today = new Date().toISOString().split('T')[0];
+    startDateInput.setAttribute('min', today);
+    endDateInput.setAttribute('min', today);
+
+    // Prevent form submission if slot is not available or in the past
     bookingForm.addEventListener('submit', function(e) {
         const startDt = buildDatetime(startDateInput.value, startTimeInput.value);
         const endDt = buildDatetime(endDateInput.value, endTimeInput.value);
@@ -542,6 +547,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!hallSelect.value || !startDt || !endDt) {
             e.preventDefault();
             setWarningState('error', 'Please select hall, start date/time, and end date/time.');
+            return false;
+        }
+
+        // Check if selected datetime is in the past
+        const now = new Date();
+        const selectedStart = new Date(startDt);
+        if (selectedStart < now) {
+            e.preventDefault();
+            setWarningState('error', 'Booking cannot be in the past. Please select a future date and time.');
             return false;
         }
 
@@ -683,6 +697,20 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = false;
             submitBtn.classList.remove('d-none');
             return;
+        }
+
+        // Client-side validation: cannot book in the past
+        if (startDt) {
+            const now = new Date();
+            const selectedStart = new Date(startDt);
+            if (selectedStart < now) {
+                setWarningState('error', 'Booking cannot be in the past. Please select a future date and time.');
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('d-none');
+                isSlotAvailable = false;
+                hasCheckedAvailability = true;
+                return;
+            }
         }
 
         // Client-side validation: end must be after start

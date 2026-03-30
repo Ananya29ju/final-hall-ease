@@ -137,6 +137,13 @@ class BookingController extends Controller
                 ->withInput();
         }
 
+        // Validate not in the past
+        if ($startDatetime->lt(now())) {
+            return back()
+                ->withErrors(['start_date' => 'Booking cannot be in the past.'])
+                ->withInput();
+        }
+
         if (
             in_array('others', $request->input('media_requirements', []), true) &&
             blank($request->media_requirements_other)
