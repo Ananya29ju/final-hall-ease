@@ -73,14 +73,6 @@
             </ul>
         </li>
 
-        {{-- Events --}}
-        <li class="menu-item mb-2 {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.events.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-party"></i>
-                <div>Events</div>
-            </a>
-        </li>
-
         {{-- Notifications --}}
         <li class="menu-item mb-2 {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
             <a href="{{ route('admin.notifications.index') }}" class="menu-link d-flex justify-content-between align-items-center">

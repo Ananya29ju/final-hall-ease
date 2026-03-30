@@ -372,11 +372,21 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Department</label>
-                    <input type="text" name="event_department" value="{{ old('event_department') }}" class="form-control" required>
+                    <select name="event_department" class="form-select" required>
+                        <option value="">Select Department</option>
+                        @foreach(['BA', 'BCA', 'BSC', 'BCOM', 'BBA', 'BVOC'] as $dept)
+                            <option value="{{ $dept }}" {{ old('event_department') == $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="form-label">Event Type</label>
-                    <input type="text" name="event_type" value="{{ old('event_type') }}" class="form-control" required>
+                    <select name="event_type" class="form-select" required>
+                        <option value="">Select Event Type</option>
+                        @foreach(['InterClass', 'InterCollege', 'District', 'State', 'National', 'InterNational', 'Seminar', 'Webinar', 'Conferance', 'Workshop'] as $type)
+                            <option value="{{ $type }}" {{ old('event_type') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
