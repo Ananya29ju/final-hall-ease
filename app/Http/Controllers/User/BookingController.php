@@ -428,23 +428,17 @@ class BookingController extends Controller
         $startDatetime = $request->query('start_datetime');
         $endDatetime = $request->query('end_datetime');
 
-        // Always fetch existing bookings for this hall to show in UI
+        // Only fetch booked ranges when both dates are selected
         $bookedRanges = [];
-        if ($hallId) {
+        if ($hallId && $startDatetime && $endDatetime) {
             $query = Booking::where('hall_id', $hallId)
                 ->where('booking_status', '!=', 'cancelled');
 
-            // If we have a start/end datetime, only show potentially relevant bookings
-            // (within a reasonable window)
-            if ($startDatetime && $endDatetime) {
-                $rangeStart = Carbon::parse($startDatetime)->subDays(1);
-                $rangeEnd = Carbon::parse($endDatetime)->addDays(1);
-                $query->where('start_datetime', '<', $rangeEnd)
-                      ->where('end_datetime', '>', $rangeStart);
-            } else {
-                // Show upcoming bookings if no specific range given
-                $query->where('end_datetime', '>', now());
-            }
+            // Only show bookings that overlap with the selected date range
+            $rangeStart = Carbon::parse($startDatetime)->subDays(1);
+            $rangeEnd = Carbon::parse($endDatetime)->addDays(1);
+            $query->where('start_datetime', '<', $rangeEnd)
+                  ->where('end_datetime', '>', $rangeStart);
 
             $bookedRanges = $query->get()
                 ->map(function ($b) {

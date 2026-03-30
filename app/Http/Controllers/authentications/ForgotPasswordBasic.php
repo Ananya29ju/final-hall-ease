@@ -4,6 +4,7 @@ namespace App\Http\Controllers\authentications;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -12,8 +13,24 @@ use Illuminate\Auth\Events\PasswordReset;
 
 class ForgotPasswordBasic extends Controller
 {
+    /**
+     * Get the dashboard route based on authenticated user's role
+     */
+    private function getDashboardRoute(): string
+    {
+        return match (true) {
+            Auth::user()->isAdmin() => 'admin.dashboard',
+            Auth::user()->isMedia() => 'media.dashboard',
+            default => 'user.dashboard',
+        };
+    }
+
     public function index()
     {
+        if (Auth::check()) {
+            return redirect()->route($this->getDashboardRoute());
+        }
+
         return view('auth.forgot');
     }
 
@@ -34,6 +51,10 @@ class ForgotPasswordBasic extends Controller
 
     public function showResetForm(Request $request, string $token)
     {
+        if (Auth::check()) {
+            return redirect()->route($this->getDashboardRoute());
+        }
+
         return view('auth.reset-password', [
             'token' => $token,
             'email' => $request->query('email'),

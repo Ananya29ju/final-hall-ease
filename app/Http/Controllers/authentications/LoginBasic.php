@@ -15,6 +15,16 @@ class LoginBasic extends Controller
      */
     public function index()
     {
+        if (Auth::check()) {
+            $dashboardRoute = match (true) {
+                Auth::user()->isAdmin() => 'admin.dashboard',
+                Auth::user()->isMedia() => 'media.dashboard',
+                default => 'user.dashboard',
+            };
+
+            return redirect()->route($dashboardRoute);
+        }
+
         return view('auth.login');
     }
 
