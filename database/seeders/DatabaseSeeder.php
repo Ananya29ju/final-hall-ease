@@ -42,45 +42,75 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        Hall::updateOrCreate(
-            ['campus_name' => 'Main Campus', 'location' => 'Admin'],
-            ['name' => 'Admin Hall', 'capacity' => 120, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
-        );
+       Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Sahodhaya'],
+    ['capacity' => 170, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+);
 
-        Hall::updateOrCreate(
-            ['campus_name' => 'Main Campus', 'location' => 'Maffie'],
-            ['name' => 'Maffie Hall', 'capacity' => 100, 'description' => 'Maffie Block halls at Main Campus.', 'status' => 'available']
-        );
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Sanidhya'],
+    ['capacity' => 150, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+);
 
-        Hall::updateOrCreate(
-            ['campus_name' => 'Main Campus', 'location' => 'Aruppe'],
-            ['name' => 'Aruppe Hall', 'capacity' => 90, 'description' => 'Aruppe Block halls at Main Campus.', 'status' => 'available']
-        );
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Magis'],
+    ['capacity' => 120, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+);
 
-        Hall::updateOrCreate(
-            ['campus_name' => 'Main Campus', 'location' => 'Xavier'],
-            ['name' => 'Xavier Hall', 'capacity' => 110, 'description' => 'Xavier Block halls at Main Campus.', 'status' => 'available']
-        );
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Peace Park'],
+    ['capacity' => 200, 'description' => 'Main Campus open area space.', 'status' => 'available']
+);
 
-        Hall::updateOrCreate(
-            ['campus_name' => 'Main Campus', 'location' => 'LCRI'],
-            ['name' => 'LCRI Hall', 'capacity' => 130, 'description' => 'LCRI Block halls at Main Campus.', 'status' => 'available']
-        );
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Altorium'],
+    ['capacity' => 180, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+);
 
-        Hall::updateOrCreate(
-            ['campus_name' => 'AIMIT Campus', 'location' => 'AIMIT'],
-            ['name' => 'AIMIT Hall', 'capacity' => 100, 'description' => 'AIMIT Campus hall.', 'status' => 'available']
-        );
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Xavier Hall'],
+    ['capacity' => 160, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+);
 
-        Hall::updateOrCreate(
-            ['campus_name' => 'Engineering Campus', 'location' => 'Engineering'],
-            ['name' => 'Engineering Hall', 'capacity' => 120, 'description' => 'Engineering Campus hall.', 'status' => 'available']
-        );
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Robert Sequeira'],
+    ['capacity' => 140, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+);
 
-        Hall::updateOrCreate(
-            ['campus_name' => 'Capitano Campus', 'location' => 'Capitano'],
-            ['name' => 'Capitano Hall', 'capacity' => 110, 'description' => 'Capitano Campus hall.', 'status' => 'available']
-        );
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'L. F. Rasuinha'],
+    ['capacity' => 130, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+);
+
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Eric Mathais'],
+    ['capacity' => 130, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+);
+
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Joseph Willy'],
+    ['capacity' => 130, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+);
+
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'AV Room'],
+    ['capacity' => 80, 'description' => 'Audio Visual room.', 'status' => 'available']
+);
+
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'AR 801'],
+    ['capacity' => 60, 'description' => 'Classroom in Admin Block.', 'status' => 'available']
+);
+
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'AR 803'],
+    ['capacity' => 60, 'description' => 'Classroom in Admin Block.', 'status' => 'available']
+);
+
+Hall::updateOrCreate(
+    ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'AR 804'],
+    ['capacity' => 60, 'description' => 'Classroom in Admin Block.', 'status' => 'available']
+);
 
         // Seed in the correct order based on dependencies
         // $this->call([
