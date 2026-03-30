@@ -130,68 +130,6 @@
         </div>
     </div>
 
-    @if(isset($waitlistedBookings) && $waitlistedBookings->isNotEmpty())
-    <div class="card mb-4 border-info">
-        <div class="card-header d-flex justify-content-between align-items-center bg-info text-white">
-            <h6 class="mb-0 text-white"><i class="bx bx-time-five me-1"></i> Waitlisted Bookings (All Users)</h6>
-            <span class="badge bg-white text-info">{{ $waitlistedBookings->count() }}</span>
-        </div>
-        <div class="card-body pt-3">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>Hall</th>
-                            <th>Staff (User)</th>
-                            <th>Event</th>
-                            <th>Date / Time</th>
-                            <th>Status</th>
-                            <th>Waitlist Expires</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($waitlistedBookings as $waitlist)
-                            <tr>
-                                <td>{{ optional($waitlist->hall)->name ?? 'N/A' }}</td>
-                                <td>{{ optional($waitlist->user)->name ?? 'N/A' }}</td>
-                                <td>{{ $waitlist->event_name }}</td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-bold">{{ $waitlist->formatted_datetime_range }}</span>
-
-                                    </div>
-                                </td>
-                                <td>
-                                    @if($waitlist->status === 'notified')
-                                        <span class="badge bg-label-success">Slot Offered</span>
-                                    @elseif($waitlist->status === 'expired')
-                                        <span class="badge bg-danger">Expired</span>
-                                    @elseif($waitlist->status === 'confirmed')
-                                        <span class="badge bg-label-primary">Confirmed</span>
-                                    @elseif($waitlist->status === 'cancelled')
-                                        <span class="badge bg-label-danger">Cancelled</span>
-                                    @else
-                                        <span class="badge bg-label-warning">Pending in Queue</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($waitlist->status === 'notified' && $waitlist->expires_at)
-                                        <small class="{{ $waitlist->expires_at->isPast() ? 'text-danger' : 'text-primary' }}">
-                                            {{ $waitlist->expires_at->format('M d, H:i') }}
-                                        </small>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    @endif
-
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="mb-0">Upcoming Approved Bookings</h6>

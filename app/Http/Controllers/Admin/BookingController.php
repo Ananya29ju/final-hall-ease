@@ -65,13 +65,8 @@ class BookingController extends Controller
             ->latest()
             ->get();
 
-        $waitlistedBookings = \App\Models\Waitlist::with(['hall', 'user'])
-            ->latest()
-            ->get();
-
         return view('admin.bookings.index', [
             'pendingActionBookings' => $pendingActionBookings,
-            'waitlistedBookings' => $waitlistedBookings,
             'upcomingBookings' => $upcomingQuery->latest('start_datetime')->get(),
             'completedBookings' => $completedQuery->latest('start_datetime')->get(),
             'cancelledBookings' => $cancelledQuery->latest('start_datetime')->get(),
@@ -373,8 +368,6 @@ class BookingController extends Controller
             'booking_status' => 'cancelled',
             'cancellation_reason' => $reasonText,
         ]);
-
-        \App\Models\Waitlist::notifyNextInWaitlist($booking->hall_id, $booking->start_datetime, $booking->end_datetime);
 
         return redirect()
             ->route('admin.bookings.cancel.form')

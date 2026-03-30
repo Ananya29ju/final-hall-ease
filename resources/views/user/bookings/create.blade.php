@@ -418,7 +418,7 @@
                         @endforeach
                     </div>
                 </div>
-                <div class="col-md-12 mb-3">
+                <div class="col-md-12 mb-3 {{ in_array('others', $selectedMedia, true) ? '' : 'd-none' }}" id="media_others_container">
                     <label class="form-label">Others (Please specify)</label>
                     <input type="text"
                            name="media_requirements_other"
@@ -455,7 +455,7 @@
                         @endforeach
                     </div>
                 </div>
-                <div class="col-md-12 mb-3">
+                <div class="col-md-12 mb-3 {{ in_array('other', $selectedResources, true) ? '' : 'd-none' }}" id="resources_other_container">
                     <label class="form-label">Other Resource (Please specify)</label>
                     <input type="text"
                            name="resources_other"
@@ -483,10 +483,6 @@
                     <i class="bx bx-save"></i> Submit Booking Request
                 </button>
 
-                <button type="button" id="join-waitlist-btn" class="btn btn-info d-none">
-                    <i class="bx bx-time-five"></i> This slot is used. Join Waitlist
-                </button>
-
                 <a href="{{ route('user.dashboard') }}" class="btn btn-secondary">
                     Cancel
                 </a>
@@ -508,7 +504,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const warningDiv = document.getElementById('availability-warning');
     const warningMsg = document.getElementById('availability-message');
     const submitBtn = document.querySelector('button[type="submit"]');
-    const waitlistBtn = document.getElementById('join-waitlist-btn');
     const bookingForm = document.querySelector('form[action="{{ route('user.bookings.store') }}"]');
 
     const bookedSlotsContainer = document.getElementById('booked-slots-container');
@@ -671,7 +666,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!hallId) {
             submitBtn.disabled = false;
             submitBtn.classList.remove('d-none');
-            waitlistBtn.classList.add('d-none');
             return;
         }
 
@@ -680,7 +674,6 @@ document.addEventListener('DOMContentLoaded', function() {
             setWarningState('error', 'End date/time must be after start date/time.');
             submitBtn.disabled = true;
             submitBtn.classList.remove('d-none');
-            waitlistBtn.classList.add('d-none');
             return;
         }
 
@@ -723,21 +716,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         setWarningState('error', data.message || 'This slot is not available.');
                         submitBtn.disabled = true;
                         submitBtn.classList.add('d-none');
-                        waitlistBtn.classList.remove('d-none');
                     } else if (data.booked_ranges && data.booked_ranges.length > 0) {
                         // Slot is available but there are nearby bookings - show warning
                         isSlotAvailable = true;
                         setWarningState('info', 'This slot is available, but please review the nearby bookings shown above. Ensure 30-min gap is maintained.');
                         submitBtn.disabled = false;
                         submitBtn.classList.remove('d-none');
-                        waitlistBtn.classList.add('d-none');
                     } else {
                         // Slot is completely available
                         isSlotAvailable = true;
                         setWarningState('success', 'This slot is available! You can proceed with your booking.');
                         submitBtn.disabled = false;
                         submitBtn.classList.remove('d-none');
-                        waitlistBtn.classList.add('d-none');
                     }
                 } else {
                     // Partial datetime info - show info message
@@ -749,7 +739,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     submitBtn.disabled = true;
                     submitBtn.classList.remove('d-none');
-                    waitlistBtn.classList.add('d-none');
                 }
 
                 // Restore submit button text
@@ -764,16 +753,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.innerHTML = '<i class="bx bx-save"></i> Submit Booking Request';
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('d-none');
-                waitlistBtn.classList.add('d-none');
             });
     }
-
-    waitlistBtn.addEventListener('click', function() {
-        if (confirm('Move this request to the Waitlist? We will notify you if it becomes available.')) {
-            bookingForm.action = "{{ route('user.waitlist.join') }}";
-            bookingForm.submit();
-        }
-    });
 
     // Add change listeners - duration calculates immediately, availability check is debounced
     [startDateInput, startTimeInput, endDateInput, endTimeInput].forEach(el => {
@@ -789,6 +770,34 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial calculation in case there are old values from failed validation
     calculateDuration();
     checkAvailability();
+
+    // Toggle "Others" input visibility for Media Requirements
+    const mediaOthersCheckbox = document.getElementById('user_media_others');
+    const mediaOthersContainer = document.getElementById('media_others_container');
+
+    mediaOthersCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            mediaOthersContainer.classList.remove('d-none');
+        } else {
+            mediaOthersContainer.classList.add('d-none');
+            // Clear the input when unchecked
+            mediaOthersContainer.querySelector('input').value = '';
+        }
+    });
+
+    // Toggle "Other" input visibility for Resources Required
+    const resourcesOtherCheckbox = document.getElementById('user_resource_other');
+    const resourcesOtherContainer = document.getElementById('resources_other_container');
+
+    resourcesOtherCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            resourcesOtherContainer.classList.remove('d-none');
+        } else {
+            resourcesOtherContainer.classList.add('d-none');
+            // Clear the input when unchecked
+            resourcesOtherContainer.querySelector('input').value = '';
+        }
+    });
 });
 </script>
 @endsection

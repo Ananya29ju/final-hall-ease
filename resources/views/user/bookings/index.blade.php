@@ -61,64 +61,6 @@
         };
     @endphp
 
-    <div class="card mb-4 border-info">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 text-info"><i class="bx bx-time-five me-1"></i> Waitlisted Bookings</h6>
-            <span class="badge bg-info">{{ $waitlistedBookings->count() }}</span>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Hall</th>
-                            <th>Event</th>
-                            <th>Date / Time</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($waitlistedBookings as $waitlist)
-                            <tr>
-                                <td>{{ $waitlist->hall->name }}</td>
-                                <td>{{ $waitlist->event_name }}</td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-bold">{{ $waitlist->formatted_datetime_range }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    @if($waitlist->status === 'notified')
-                                        <span class="badge bg-label-success animate__animated animate__pulse animate__infinite">Notified! Action Required</span>
-                                        <div class="mt-1">
-                                            <small class="text-danger">Expires: {{ $waitlist->expires_at->format('H:i') }} ({{ $waitlist->expires_at->diffForHumans() }})</small>
-                                        </div>
-                                    @else
-                                        <span class="badge bg-label-info">Waiting (FIFO)</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($waitlist->status === 'notified')
-                                        <a href="{{ route('user.waitlist.confirm', $waitlist->id) }}" class="btn btn-sm btn-success">
-                                            <i class="bx bx-check me-1"></i> Confirm Booking
-                                        </a>
-                                    @else
-                                        <span class="text-muted small">Awaiting cancellation...</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">No waitlisted bookings.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="mb-0">Upcoming Bookings</h6>

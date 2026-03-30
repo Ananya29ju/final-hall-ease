@@ -8,7 +8,6 @@ use App\Models\Hall;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Waitlist;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\NewBookingRequest;
@@ -63,13 +62,7 @@ class BookingController extends Controller
         $completedBookings = $completedQuery->latest('start_datetime')->get();
         $cancelledBookings = $cancelledQuery->latest('start_datetime')->get();
 
-        $waitlistedBookings = Waitlist::with('hall')
-            ->where('user_id', Auth::id())
-            ->whereIn('status', ['pending', 'notified'])
-            ->latest()
-            ->get();
-
-        return view('user.bookings.index', compact('upcomingBookings', 'completedBookings', 'cancelledBookings', 'waitlistedBookings'));
+        return view('user.bookings.index', compact('upcomingBookings', 'completedBookings', 'cancelledBookings'));
     }
 
     /**
@@ -298,125 +291,9 @@ class BookingController extends Controller
             }
         }
 
-        // 🔥 Waitlist Logic: Find the first eligible waitlisted user
-        \App\Models\Waitlist::notifyNextInWaitlist($booking->hall_id, $booking->start_datetime, $booking->end_datetime);
-
         return redirect()
             ->route('user.bookings.cancel.form')
             ->with('success', 'Booking cancellation details submitted successfully.');
-    }
-
-    /**
-     * Join waitlist for a specific slot.
-     */
-    public function joinWaitlist(Request $request)
-    {
-        $request->validate([
-            'hall_id' => 'required|exists:halls,id',
-            'start_date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required|date_format:H:i',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'end_time' => 'required|date_format:H:i',
-            'event_name' => 'required|string|max:255',
-            'event_department' => 'required|string|max:255',
-            'event_type' => 'required|string|max:255',
-            'coordinator_name' => 'required|string|max:255',
-            'coordinator_phone' => 'required|string|max:20',
-            'coordinator_department' => 'required|string|max:255',
-            'coordinator_email' => 'required|email|max:255',
-            'coordinator_emergency_number' => 'required|string|max:20',
-            'media_requirements' => 'nullable|array',
-            'resources' => 'nullable|array',
-        ]);
-
-        $startDatetime = Carbon::parse($request->start_date . ' ' . $request->start_time);
-        $endDatetime = Carbon::parse($request->end_date . ' ' . $request->end_time);
-
-        if ($endDatetime->lte($startDatetime)) {
-            return back()
-                ->withErrors(['end_time' => 'End date/time must be after start date/time.'])
-                ->withInput();
-        }
-
-        Waitlist::create([
-            'hall_id' => $request->hall_id,
-            'user_id' => Auth::id(),
-            'start_datetime' => $startDatetime,
-            'end_datetime' => $endDatetime,
-            'event_name' => $request->event_name,
-            'event_department' => $request->event_department,
-            'event_type' => $request->event_type,
-            'coordinator_name' => $request->coordinator_name,
-            'coordinator_phone' => $request->coordinator_phone,
-            'coordinator_department' => $request->coordinator_department,
-            'coordinator_email' => $request->coordinator_email,
-            'coordinator_emergency_number' => $request->coordinator_emergency_number,
-            'media_requirements' => $request->input('media_requirements', []),
-            'media_requirements_other' => $request->media_requirements_other,
-            'resources' => $request->input('resources', []),
-            'resources_other' => $request->resources_other,
-            'status' => 'pending',
-        ]);
-
-        return redirect()->route('user.bookings.index')
-            ->with('success', 'You have been added to the waitlist for this slot.');
-    }
-
-    /**
-     * Confirm a waitlisted booking.
-     */
-    public function confirmWaitlist($waitlistId)
-    {
-        $waitlist = Waitlist::where('id', $waitlistId)
-            ->where('user_id', Auth::id())
-            ->where('status', 'notified')
-            ->firstOrFail();
-
-        if ($waitlist->expires_at->isPast()) {
-            $waitlist->update(['status' => 'expired']);
-            return redirect()->route('user.bookings.index')->with('error', 'The confirmation window has expired.');
-        }
-
-        DB::transaction(function () use ($waitlist) {
-            $ownerColumn = $this->getBookingOwnerColumn();
-
-            $bookingData = [
-                'hall_id' => $waitlist->hall_id,
-                'start_datetime' => $waitlist->start_datetime,
-                'end_datetime' => $waitlist->end_datetime,
-                'booking_status' => 'pending',
-                'admin_status' => 'pending',
-                'media_status' => !empty($waitlist->media_requirements) ? 'pending' : 'not_required',
-                'event_name' => $waitlist->event_name,
-                'event_department' => $waitlist->event_department,
-                'event_type' => $waitlist->event_type,
-                'coordinator_name' => $waitlist->coordinator_name,
-                'coordinator_phone' => $waitlist->coordinator_phone,
-                'coordinator_department' => $waitlist->coordinator_department,
-                'coordinator_email' => $waitlist->coordinator_email,
-                'coordinator_emergency_number' => $waitlist->coordinator_emergency_number,
-                'media_requirements' => $waitlist->media_requirements,
-                'media_requirements_other' => $waitlist->media_requirements_other,
-                'resources' => $waitlist->resources,
-                'resources_other' => $waitlist->resources_other,
-            ];
-            $bookingData[$ownerColumn] = Auth::id();
-            if ($this->hasBookingColumn('created_by')) {
-                $bookingData['created_by'] = Auth::id();
-            }
-
-            $booking = Booking::create($bookingData);
-            $waitlist->update(['status' => 'confirmed']);
-
-            // Notify Admins
-            $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new NewBookingRequest($booking));
-            }
-        });
-
-        return redirect()->route('user.bookings.index')
-            ->with('success', 'Booking confirmed successfully.');
     }
 
     /**

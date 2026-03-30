@@ -94,7 +94,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-warning">
-                        <strong>Warning:</strong> You are about to cancel the booking for <strong id="modal_event_name">...</strong> at <strong id="modal_hall_name">...</strong>. This action will immediately free the time slot and notify waitlisted users.
+                        <strong>Warning:</strong> You are about to cancel the booking for <strong id="modal_event_name">...</strong> at <strong id="modal_hall_name">...</strong>. This action will immediately free the time slot.
                     </div>
 
                     <h6 class="mb-3 mt-4">Please provide a reason for cancellation:</h6>

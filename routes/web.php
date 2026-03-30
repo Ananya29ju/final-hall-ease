@@ -139,10 +139,6 @@ Route::middleware(['auth', 'staff'])
         Route::post('bookings/cancel', [UserBookingController::class, 'cancel'])->name('bookings.cancel.submit');
         Route::get('bookings/check-availability', [UserBookingController::class, 'checkAvailability'])->name('bookings.check-availability');
         Route::get('notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
-        
-        // Waitlist Management
-        Route::post('waitlist/join', [UserBookingController::class, 'joinWaitlist'])->name('waitlist.join');
-        Route::get('waitlist/{waitlist}/confirm', [UserBookingController::class, 'confirmWaitlist'])->name('waitlist.confirm');
     });
 
 // ============================================
