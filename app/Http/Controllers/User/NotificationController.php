@@ -14,117 +14,31 @@ class NotificationController extends Controller
      */
     public function index()
     {
-        $ownerColumn = $this->getBookingOwnerColumn();
-        $bookingsTable = (new Booking())->getTable();
-        $hasCancellationReason = Schema::hasColumn($bookingsTable, 'cancellation_reason');
-
-        $baseQuery = Booking::with('hall');
-        if ($ownerColumn) {
-            $baseQuery->where($ownerColumn, Auth::id());
-        } else {
-            $baseQuery->whereRaw('1 = 0');
-        }
-
-        $bookingUpdates = (clone $baseQuery)
-            ->when($hasCancellationReason, function ($query) {
-                $query->where(function ($q) {
-                    $q->whereNull('cancellation_reason')
-                        ->orWhere('cancellation_reason', '');
-                });
-            })
-            ->latest('created_at')
-            ->take(20)
-            ->get();
-
-        $cancellationNotifications = collect();
-        if ($hasCancellationReason) {
-            $cancellationNotifications = (clone $baseQuery)
-                ->whereNotNull('cancellation_reason')
-                ->where('cancellation_reason', '!=', '')
-                ->latest('updated_at')
-                ->take(20)
-                ->get();
-        }
-
-        $upcomingReminders = (clone $baseQuery)
-            ->where('start_datetime', '>=', now())
-            ->where('start_datetime', '<=', now()->addDays(7))
-            ->when($hasCancellationReason, function ($query) {
-                $query->where(function ($q) {
-                    $q->whereNull('cancellation_reason')
-                        ->orWhere('cancellation_reason', '');
-                });
-            })
-            ->orderBy('start_datetime')
-            ->take(20)
-            ->get();
-
-        $latestUpdates = collect();
-
-        $latestUpdates = $latestUpdates->merge(
-            $bookingUpdates->map(function (Booking $booking) {
-                return [
-                    'type' => 'Booking Submitted',
-                    'type_class' => 'success',
-                    'hall_name' => optional($booking->hall)->name ?? 'N/A',
-                    'event_name' => $booking->event_name ?? 'N/A',
-                    'details' => 'Hall booking request submitted successfully.',
-                    'time' => $booking->created_at,
-                ];
-            })
-        );
-
-        $latestUpdates = $latestUpdates->merge(
-            $cancellationNotifications->map(function (Booking $booking) {
-                return [
-                    'type' => 'Cancellation Update',
-                    'type_class' => 'danger',
-                    'hall_name' => optional($booking->hall)->name ?? 'N/A',
-                    'event_name' => $booking->event_name ?? 'N/A',
-                    'details' => $booking->cancellation_reason ?: 'Booking cancelled.',
-                    'time' => $booking->updated_at,
-                ];
-            })
-        );
-
-        $latestUpdates = $latestUpdates->merge(
-            $upcomingReminders->map(function (Booking $booking) {
-                return [
-                    'type' => 'Upcoming Reminder',
-                    'type_class' => 'warning',
-                    'hall_name' => optional($booking->hall)->name ?? 'N/A',
-                    'event_name' => $booking->event_name ?? 'N/A',
-                    'details' => 'Event scheduled: ' . $booking->formatted_datetime_range,
-                    'time' => $booking->start_datetime,
-                ];
-            })
-        );
-
-        $latestUpdates = $latestUpdates
-            ->sortByDesc('time')
-            ->take(20)
-            ->values();
+        $notifications = auth()->user()->notifications()->latest()->take(30)->get();
 
         return view('user.notifications.index', [
-            'latestUpdates' => $latestUpdates,
+            'notifications' => $notifications,
         ]);
     }
 
     /**
-     * Resolve booking owner column name for mixed schemas.
+     * Mark notification as read or unread.
      */
-    private function getBookingOwnerColumn(): ?string
+    public function markAsRead($id)
     {
-        $table = (new Booking())->getTable();
-
-        if (Schema::hasColumn($table, 'customer_id')) {
-            return 'customer_id';
+        $notification = auth()->user()->notifications()->where('id', $id)->first();
+        
+        if ($notification) {
+            if ($notification->read()) {
+                $notification->markAsUnread();
+                $status = 'unread';
+            } else {
+                $notification->markAsRead();
+                $status = 'read';
+            }
+            return back()->with('success', "Notification marked as {$status}.");
         }
 
-        if (Schema::hasColumn($table, 'user_id')) {
-            return 'user_id';
-        }
-
-        return null;
+        return back()->with('error', 'Notification not found.');
     }
 }

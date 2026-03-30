@@ -38,30 +38,31 @@ class RegisterBasic extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
+            'role' => 'required|in:user,media',
             'password' => 'required|string|min:6|confirmed',
-        ], [
-            'name.required' => 'Name is required',
-            'name.max' => 'Name must not exceed 255 characters',
-            'email.required' => 'Email is required',
-            'email.email' => 'Please enter a valid email',
-            'email.unique' => 'This email is already registered',
-            'password.required' => 'Password is required',
-            'password.min' => 'Password must be at least 6 characters',
-            'password.confirmed' => 'Passwords do not match',
         ]);
 
         try {
+            $isMedia = $validated['role'] === 'media';
+            
             // Create new user
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
                 'password' => Hash::make($validated['password']),
-                'role' => 'user', // Default role
+                'role' => $validated['role'],
+                'status' => $isMedia ? 'pending' : 'approved',
                 'email_verified_at' => now(),
             ]);
 
-            // Auto login after registration
+            if ($isMedia) {
+                // If media, do not auto-login, redirect to login with verification message
+                return redirect()->route('login')
+                    ->with('success', 'Your account has been created and is under verification. Please wait for admin approval.');
+            }
+
+            // Auto login after registration for staff
             Auth::login($user);
 
             // Redirect to user dashboard
@@ -69,9 +70,8 @@ class RegisterBasic extends Controller
                 ->with('success', 'Registration successful! Welcome to HallEase.');
         } catch (\Exception $e) {
             report($e);
-
             return back()
-                ->withInput($request->only('name', 'email', 'phone'))
+                ->withInput($request->only('name', 'email', 'phone', 'role'))
                 ->with('error', 'An error occurred during registration. Please try again.');
         }
     }

@@ -46,12 +46,31 @@ class LoginBasic extends Controller
 
         // Attempt to login
         if (Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
+            $user = Auth::user();
+
+            // Check if account is approved
+            if (!$user->isApproved()) {
+                $status = $user->status;
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                $message = 'Your account is not approved yet.';
+                if ($status === 'pending') {
+                    $message = 'Your account is under verification. Please wait for admin approval.';
+                } elseif ($status === 'rejected') {
+                    $message = 'Your account request has been rejected. Please contact admin.';
+                }
+
+                return redirect()->route('login')->with('error', $message);
+            }
+
             // Regenerate session
             $request->session()->regenerate();
 
             $dashboardRoute = match (true) {
-                Auth::user()->isAdmin() => 'admin.dashboard',
-                Auth::user()->isMedia() => 'media.dashboard',
+                $user->isAdmin() => 'admin.dashboard',
+                $user->isMedia() => 'media.dashboard',
                 default => 'user.dashboard',
             };
 

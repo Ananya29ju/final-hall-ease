@@ -21,8 +21,10 @@
                         </a>
                     </div>
                     <!-- /Logo -->
+                    @if(!session('success'))
                     <h4 class="mb-1">Welcome to {{ config('variables.templateName') }}! 👋</h4>
                     <p class="mb-6">Please sign-in to your account and start the adventure</p>
+                    @endif
 
                     @if ($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -47,13 +49,17 @@
                             {{ session('success') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
+                        <div class="text-center mt-6 mb-2">
+                            <a href="{{ route('login') }}" class="btn btn-outline-primary w-100">Back to login</a>
+                        </div>
                     @endif
 
-                    <form id="formAuthentication" class="mb-6" action="{{ route('login-store') }}" method="POST">
+                    @if(!session('success'))
+                    <form id="formAuthentication" class="mb-6" action="{{ route('login-store') }}" method="POST" autocomplete="off">
                         @csrf
                         <div class="mb-6">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" placeholder="Enter your email" value="{{ old('email') }}" autofocus />
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" placeholder="Enter your email" autofocus autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" />
                             @error('email')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -61,7 +67,7 @@
                         <div class="mb-6 form-password-toggle">
                             <label class="form-label" for="password">Password</label>
                             <div class="input-group input-group-merge">
-                                <input type="password" id="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" />
+                                <input type="password" id="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');" />
                                 <span class="input-group-text cursor-pointer"><i class="icon-base bx bx-hide"></i></span>
                             </div>
                             @error('password')
@@ -90,6 +96,7 @@
                             <span>Create an account</span>
                         </a>
                     </p>
+                    @endif
                 </div>
             </div>
             <!-- /Login Card -->

@@ -49,12 +49,12 @@ class DatabaseSeeder extends Seeder
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Sanidhya'],
-            ['capacity' => 150, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+            ['capacity' => 100, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Magis'],
-            ['capacity' => 120, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+            ['capacity' => 60, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
@@ -64,12 +64,12 @@ class DatabaseSeeder extends Seeder
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Admin', 'name' => 'Altorium'],
-            ['capacity' => 180, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+            ['capacity' => 700, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Xavier', 'name' => 'Xavier Hall'],
-            ['capacity' => 160, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+            ['capacity' => 130, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
@@ -79,37 +79,37 @@ class DatabaseSeeder extends Seeder
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'LCRI', 'name' => 'L. F. Rasuinha'],
-            ['capacity' => 130, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+            ['capacity' => 450, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Maffei', 'name' => 'Eric Mathais'],
-            ['capacity' => 130, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+            ['capacity' => 255, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Maffei', 'name' => 'Joseph Willy'],
-            ['capacity' => 130, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
+            ['capacity' => 110, 'description' => 'Main Campus Admin Block hall.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Aruppe', 'name' => 'AV Room'],
-            ['capacity' => 80, 'description' => 'Audio Visual room.', 'status' => 'available']
+            ['capacity' => 100, 'description' => 'Audio Visual room.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Aruppe', 'name' => 'AR 801'],
-            ['capacity' => 60, 'description' => 'Classroom in Admin Block.', 'status' => 'available']
+            ['capacity' => 250, 'description' => 'Classroom in Admin Block.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Aruppe', 'name' => 'AR 803'],
-            ['capacity' => 60, 'description' => 'Classroom in Admin Block.', 'status' => 'available']
+            ['capacity' => 400, 'description' => 'Classroom in Admin Block.', 'status' => 'available']
         );
 
         Hall::updateOrCreate(
             ['campus_name' => 'Main Campus', 'location' => 'Aruppe', 'name' => 'AR 804'],
-            ['capacity' => 60, 'description' => 'Classroom in Admin Block.', 'status' => 'available']
+            ['capacity' => 600, 'description' => 'Classroom in Admin Block.', 'status' => 'available']
         );
 
         // Seed in the correct order based on dependencies

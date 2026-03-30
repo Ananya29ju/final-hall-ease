@@ -389,6 +389,20 @@ class BookingController extends Controller
             'cancellation_reason' => $reasonText,
         ]);
 
+        // 1. Notify Staff
+        $staff = $booking->customer ?: $booking->user;
+        if ($staff) {
+            $staff->notify(new BookingStatusUpdated($booking, 'admin', 'cancelled'));
+        }
+
+        // 2. Notify Media Team (ONLY if it was already approved and media required)
+        if ($booking->requiresMedia() && $booking->admin_status === 'approved') {
+            $mediaUsers = User::where('role', 'media')->get();
+            foreach ($mediaUsers as $mediaUser) {
+                $mediaUser->notify(new BookingStatusUpdated($booking, 'admin_media', 'cancelled'));
+            }
+        }
+
         return redirect()
             ->route('admin.bookings.cancel.form')
             ->with('success', 'Booking cancellation details submitted successfully.');

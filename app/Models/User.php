@@ -16,6 +16,7 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
+        'status',
     ];
 
     protected $hidden = [
@@ -29,7 +30,7 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class);
     }
 
-    // ⭐ helper (useful in middleware later)
+    // ⭐ helpers
     public function isAdmin()
     {
         return strtolower((string) $this->role) === 'admin';
@@ -43,6 +44,11 @@ class User extends Authenticatable
     public function isMedia()
     {
         return strtolower((string) $this->role) === 'media';
+    }
+
+    public function isApproved()
+    {
+        return strtolower((string) $this->status) === 'approved';
     }
 
     public function createdBookings()

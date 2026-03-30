@@ -94,6 +94,19 @@
             </a>
         </li>
 
+        {{-- Verifications --}}
+        <li class="menu-item mb-2 {{ request()->routeIs('admin.verifications.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.verifications.index') }}" class="menu-link d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="menu-icon tf-icons bx bx-check-shield"></i>
+                    Media Verifications
+                </span>
+                @if(($pending_verification_count ?? 0) > 0)
+                    <span class="badge bg-warning rounded-pill">{{ $pending_verification_count }}</span>
+                @endif
+            </a>
+        </li>
+
         {{-- Settings --}}
         <li class="menu-item mb-2 {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
             <a href="{{ route('admin.settings.index') }}" class="menu-link">

@@ -9,37 +9,35 @@ use Illuminate\Support\Facades\Schema;
 class NotificationController extends Controller
 {
     /**
-     * Show media notifications for newly booked halls.
+     * Show media notifications.
      */
     public function index()
     {
+        $notifications = auth()->user()->notifications()->latest()->take(30)->get();
+
         return view('media.notifications.index', [
-            'newBookings' => $this->newBookingsQuery()
-                ->latest()
-                ->take(30)
-                ->get(),
+            'notifications' => $notifications,
         ]);
     }
 
     /**
-     * Base query for bookings that media should be notified about.
+     * Mark notification as read or unread.
      */
-    private function newBookingsQuery()
+    public function markAsRead($id)
     {
-        $bookingsTable = (new Booking())->getTable();
-        $query = Booking::with(['hall', 'customer', 'user']);
-
-        if (Schema::hasColumn($bookingsTable, 'booking_status')) {
-            $query->where('booking_status', 'confirmed');
+        $notification = auth()->user()->notifications()->where('id', $id)->first();
+        
+        if ($notification) {
+            if ($notification->read()) {
+                $notification->markAsUnread();
+                $status = 'unread';
+            } else {
+                $notification->markAsRead();
+                $status = 'read';
+            }
+            return back()->with('success', "Notification marked as {$status}.");
         }
 
-        if (Schema::hasColumn($bookingsTable, 'cancellation_reason')) {
-            $query->where(function ($builder) {
-                $builder->whereNull('cancellation_reason')
-                    ->orWhere('cancellation_reason', '');
-            });
-        }
-
-        return $query;
+        return back()->with('error', 'Notification not found.');
     }
 }

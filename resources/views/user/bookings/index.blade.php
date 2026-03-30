@@ -49,6 +49,16 @@
                     echo '<small class="badge bg-label-' . $mediaBadge . '" style="font-size: 0.65rem;">Media: ' . e(ucfirst(str_replace('_', ' ', $booking->media_status))) . '</small>';
                 }
                 echo '</div>';
+                
+                // Media Feedback Display
+                if (($booking->media_status === 'rejected' || $booking->media_status === 'kept_pending') && $booking->media_feedback_reason) {
+                    echo '<div class="mt-1 p-2 border rounded bg-light-warning" style="font-size: 0.75rem; line-height: 1.2;">';
+                    echo '<strong>Media Note:</strong> ' . e($booking->media_feedback_reason);
+                    if ($booking->media_remarks) {
+                        echo '<br><i class="text-muted">' . e($booking->media_remarks) . '</i>';
+                    }
+                    echo '</div>';
+                }
                 echo '</div>';
                 echo '</td>';
 

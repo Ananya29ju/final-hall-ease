@@ -106,6 +106,10 @@ Route::middleware(['auth', 'admin'])
         Route::post('staff/store-user', [StaffController::class, 'storeUser'])->name('staff.store-user');
         Route::resource('staff', StaffController::class);
 
+        // User Verification
+        Route::get('verifications', [\App\Http\Controllers\Admin\UserVerificationController::class, 'index'])->name('verifications.index');
+        Route::patch('verifications/{user}', [\App\Http\Controllers\Admin\UserVerificationController::class, 'update'])->name('verifications.update');
+
         // Reports Routes
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/bookings', [ReportController::class, 'bookings'])->name('reports.bookings');
@@ -120,6 +124,7 @@ Route::middleware(['auth', 'admin'])
 
         // Notifications
         Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     });
 
 // ============================================
@@ -139,6 +144,7 @@ Route::middleware(['auth', 'staff'])
         Route::post('bookings/cancel', [UserBookingController::class, 'cancel'])->name('bookings.cancel.submit');
         Route::get('bookings/check-availability', [UserBookingController::class, 'checkAvailability'])->name('bookings.check-availability');
         Route::get('notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/{id}/read', [UserNotificationController::class, 'markAsRead'])->name('notifications.read');
     });
 
 // ============================================
@@ -152,6 +158,7 @@ Route::middleware(['auth', 'media'])
         Route::get('bookings', [App\Http\Controllers\Media\BookingController::class, 'index'])->name('bookings.index');
         Route::patch('bookings/{booking}/status', [App\Http\Controllers\Media\BookingController::class, 'updateStatus'])->name('bookings.updateStatus');
         Route::get('notifications', [MediaNotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/{id}/read', [MediaNotificationController::class, 'markAsRead'])->name('notifications.read');
     });
 
 // ============================================

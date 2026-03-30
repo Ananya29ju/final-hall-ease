@@ -8,54 +8,55 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1">Hall Booking Notifications</h5>
-                        <small class="text-muted">New bookings that may need media coordination.</small>
-                    </div>
-                    <span class="badge bg-warning">{{ $newBookings->count() }}</span>
+                    <h5 class="mb-0">Media Notifications</h5>
+                    @php
+                        $unreadCount = $notifications->where('read_at', null)->count();
+                    @endphp
+                    @if($unreadCount > 0)
+                        <span class="badge bg-danger">{{ $unreadCount }} New</span>
+                    @endif
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-sm table-striped align-middle">
+                        <table class="table table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Booking</th>
-                                    <th>User</th>
-                                    <th>Hall</th>
-                                    <th>Event</th>
-                                    <th>Date / Time</th>
-                                    <th>Media Needs</th>
+                                    <th>Message</th>
+                                    <th>Time</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($newBookings as $booking)
-                                    <tr>
-                                        <td>#{{ $booking->id }}</td>
-                                        <td>{{ $booking->customer->name ?? $booking->user->name ?? 'N/A' }}</td>
-                                        <td>{{ $booking->hall->name ?? 'N/A' }}</td>
-                                        <td>{{ $booking->event_name ?? 'N/A' }}</td>
-                                        <td>{{ $booking->formatted_datetime_range }}</td>
+                                @forelse($notifications as $notification)
+                                    <tr class="{{ $notification->unread() ? 'table-primary' : '' }}">
                                         <td>
-                                            @php
-                                                $mediaRequirements = collect($booking->media_requirements ?? [])
-                                                    ->filter()
-                                                    ->map(fn ($item) => ucfirst(str_replace('_', ' ', $item)));
-                                            @endphp
-
-                                            @if ($mediaRequirements->isNotEmpty())
-                                                {{ $mediaRequirements->join(', ') }}
-                                                @if (!empty($booking->media_requirements_other))
-                                                    <br>
-                                                    <small class="text-muted">Other: {{ $booking->media_requirements_other }}</small>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold">{{ $notification->data['event_name'] ?? 'Booking Update' }}</span>
+                                                <small class="text-muted">{{ $notification->data['message'] ?? 'New notification received.' }}</small>
+                                            </div>
+                                        </td>
+                                        <td>{{ $notification->created_at->diffForHumans() }}</td>
+                                        <td class="text-center">
+                                            <form action="{{ route('media.notifications.read', $notification->id) }}" method="POST">
+                                                @csrf
+                                                @if($notification->unread())
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bx bx-check-circle me-1"></i> Mark as Read
+                                                    </button>
+                                                @else
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="bx bx-undo me-1"></i> Mark as Unread
+                                                    </button>
                                                 @endif
-                                            @else
-                                                <span class="text-muted">No media requirements selected.</span>
-                                            @endif
+                                            </form>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">No hall booking notifications found.</td>
+                                        <td colspan="3" class="text-center text-muted py-4">
+                                            <i class="bx bx-bell-off mb-2 d-block fs-1"></i>
+                                            No new notifications.
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>

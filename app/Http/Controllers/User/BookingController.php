@@ -283,8 +283,8 @@ class BookingController extends Controller
             $admin->notify(new \App\Notifications\BookingStatusUpdated($booking, 'user', 'cancelled'));
         }
 
-        // Notify Media if media was requested
-        if ($booking->requiresMedia()) {
+        // Notify Media ONLY if media was requested AND it was already approved (so they know about it)
+        if ($booking->requiresMedia() && $booking->admin_status === 'approved') {
             $mediaUsers = \App\Models\User::where('role', 'media')->get();
             foreach ($mediaUsers as $mediaUser) {
                 $mediaUser->notify(new \App\Notifications\BookingStatusUpdated($booking, 'user_media', 'cancelled'));

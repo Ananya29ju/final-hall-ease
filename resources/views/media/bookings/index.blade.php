@@ -212,15 +212,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Simple validation for the checkboxes
+        // Selective validation for the checkboxes
         document.getElementById('mediaFeedbackForm').addEventListener('submit', function(e) {
-            const checkboxes = document.querySelectorAll('input[name="unavailable_media_requirements[]"]');
-            if (checkboxes.length > 0) {
-                let checked = false;
-                checkboxes.forEach(cb => { if(cb.checked) checked = true; });
-                if (!checked) {
-                    alert('Please select at least one unavailable media requirement.');
-                    e.preventDefault();
+            const status = document.getElementById('modal_media_status').value;
+            
+            // Only validate if status is rejected
+            if (status === 'rejected') {
+                const checkboxes = document.querySelectorAll('input[name="unavailable_media_requirements[]"]');
+                if (checkboxes.length > 0) {
+                    let checked = false;
+                    checkboxes.forEach(cb => { if(cb.checked) checked = true; });
+                    if (!checked) {
+                        alert('Please select at least one unavailable media requirement when rejecting.');
+                        e.preventDefault();
+                    }
                 }
             }
         });

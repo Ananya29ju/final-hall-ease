@@ -55,9 +55,14 @@
         </li>
 
         <li class="menu-item mb-2 {{ request()->routeIs('user.notifications.*') ? 'active' : '' }}">
-            <a href="{{ route('user.notifications.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-bell"></i>
-                <div>Notifications</div>
+            <a href="{{ route('user.notifications.index') }}" class="menu-link d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="menu-icon tf-icons bx bx-bell"></i>
+                    Notifications
+                </span>
+                @if(($user_notification_count ?? 0) > 0)
+                    <span class="badge bg-danger rounded-pill">{{ $user_notification_count }}</span>
+                @endif
             </a>
         </li>
 

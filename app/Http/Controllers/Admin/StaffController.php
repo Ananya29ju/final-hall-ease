@@ -23,7 +23,9 @@ class StaffController extends Controller
             ->latest()
             ->paginate(10, ['*'], 'staff_page');
 
+        // Only show approved media members in the main management list
         $mediaMembers = User::where('role', 'media')
+            ->where('status', 'approved')
             ->latest()
             ->paginate(10, ['*'], 'media_page');
 
@@ -64,6 +66,7 @@ class StaffController extends Controller
             'phone' => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => 'admin',
+            'status' => 'approved',
             'email_verified_at' => now(),
         ]);
 
@@ -91,6 +94,7 @@ class StaffController extends Controller
             'phone' => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'status' => 'approved',
             'email_verified_at' => now(),
         ]);
 

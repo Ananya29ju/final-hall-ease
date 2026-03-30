@@ -47,22 +47,30 @@ class BookingStatusUpdated extends Notification
         if ($this->statusType === 'admin') {
             $message = "Administrator has updated your booking '{$this->booking->event_name}' to '{$this->newStatus}'.";
         } elseif ($this->statusType === 'admin_approved_media') {
-            $message = "New media request: Administrator has approved booking '{$this->booking->event_name}' and requested media services.";
+            $message = "New Media Request: Booking '{$this->booking->event_name}' has been approved and requires media services.";
         } elseif ($this->statusType === 'media' || $this->statusType === 'media_confirmed') {
             if ($this->newStatus === 'accepted') {
                 $message = "The Media Team has accepted your request for '{$this->booking->event_name}'.";
             } elseif ($this->newStatus === 'rejected') {
                 $message = "Media request for '{$this->booking->event_name}' was rejected. Reason: " . ($this->booking->media_feedback_reason ?? 'N/A');
                 if ($this->booking->unavailable_media_requirements) {
-                    $message .= ". Unavailable: " . implode(', ', $this->booking->unavailable_media_requirements);
+                    $mediaItems = is_array($this->booking->unavailable_media_requirements) ? implode(', ', $this->booking->unavailable_media_requirements) : $this->booking->unavailable_media_requirements;
+                    $message .= ". Unavailable: " . $mediaItems;
                 }
             } elseif ($this->newStatus === 'kept_pending') {
                 $message = "Media request for '{$this->booking->event_name}' is kept pending. Reason: " . ($this->booking->media_feedback_reason ?? 'N/A');
                 if ($this->booking->unavailable_media_requirements) {
-                    $message .= ". Issues with: " . implode(', ', $this->booking->unavailable_media_requirements);
+                    $mediaItems = is_array($this->booking->unavailable_media_requirements) ? implode(', ', $this->booking->unavailable_media_requirements) : $this->booking->unavailable_media_requirements;
+                    $message .= ". Potential issues with: " . $mediaItems;
                 }
             }
-        } elseif ($this->statusType === 'user' || $this->statusType === 'user_media') {
+        } elseif ($this->statusType === 'user_media') {
+            $reason = $this->booking->cancellation_reason ? " Reason: {$this->booking->cancellation_reason}." : '';
+            $message = "A booking requiring media services ('{$this->booking->event_name}') has been cancelled by the staff." . $reason;
+        } elseif ($this->statusType === 'admin_media') {
+            $reason = $this->booking->cancellation_reason ? " Reason: {$this->booking->cancellation_reason}." : '';
+            $message = "An approved booking requiring media ('{$this->booking->event_name}') has been cancelled by the Administrator." . $reason;
+        } elseif ($this->statusType === 'user') {
             $reason = $this->booking->cancellation_reason ? " Reason: {$this->booking->cancellation_reason}." : '';
             $message = "The staff/coordinator has cancelled the booking '{$this->booking->event_name}'." . $reason;
         }
