@@ -27,30 +27,82 @@
                 </div>
             @endif
 
+            @if($bookings->isEmpty())
+                <div class="alert alert-info">
+                    <i class="bx bx-info-circle me-1"></i> No bookings found.
+                </div>
+            @else
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    @foreach($bookings as $booking)
+                        <div class="col">
+                            <div class="card h-100 border shadow-none {{ $booking->booking_status === 'cancelled' ? 'bg-label-secondary border-secondary' : 'border-primary' }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h5 class="card-title mb-0 text-truncate" title="{{ $booking->event_name }}">{{ $booking->event_name ?: 'Unnamed Event' }}</h5>
+                                        @php
+                                            $statusBadge = match ($booking->booking_status) {
+                                                'confirmed', 'confirmed without media' => 'success',
+                                                'completed' => 'secondary',
+                                                'cancelled', 'rejected' => 'danger',
+                                                'waiting for media', 'pending' => 'warning',
+                                                default => 'info',
+                                            };
+                                        @endphp
+                                        <span class="badge bg-{{ $statusBadge }}">{{ ucfirst($booking->booking_status) }}</span>
+                                    </div>
+                                    <hr class="mt-0 mb-3">
+                                    <ul class="list-unstyled mb-3 text-muted">
+                                        <li class="mb-2 d-flex align-items-center"><i class="bx bx-buildings text-primary fs-5 me-2"></i> {{ $booking->hall->name ?? 'Unknown Hall' }}</li>
+                                        <li class="mb-2 d-flex align-items-center"><i class="bx bx-user text-info fs-5 me-2"></i> {{ optional($booking->customer)->name ?? optional($booking->user)->name ?? 'N/A' }}</li>
+                                        <li class="mb-2 d-flex align-items-center"><i class="bx bx-calendar-event text-success fs-5 me-2"></i> {{ $booking->formatted_datetime_range }}</li>
+                                    </ul>
+                                </div>
+                                <div class="card-footer bg-transparent border-top mt-auto pt-3">
+                                    @php
+                                        // Disable cancel if it's already cancelled, completed, or if the event is strictly in the past
+                                        $isPast = $booking->end_datetime && $booking->end_datetime->isPast();
+                                        $isDisabled = in_array($booking->booking_status, ['cancelled', 'completed', 'rejected']) || $isPast;
+                                    @endphp
+                                    <button
+                                        type="button"
+                                        class="btn w-100 {{ $isDisabled ? 'btn-outline-secondary' : 'btn-danger' }}"
+                                        {{ $isDisabled ? 'disabled' : '' }}
+                                        onclick="openCancelModal({{ $booking->id }}, '{{ addslashes($booking->event_name) }}', '{{ $booking->hall->name ?? 'Hall' }}')"
+                                    >
+                                        <i class="bx bx-x-circle me-1"></i> {{ $isDisabled ? 'Cannot Cancel' : 'Cancel Booking' }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Cancellation Modal -->
+<div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-danger">
             <form action="{{ route('admin.bookings.cancel.submit') }}" method="POST">
                 @csrf
+                <input type="hidden" name="booking_id" id="modal_booking_id">
 
-                <div class="mb-4">
-                    <h5 class="mb-3">Select Existing Booking</h5>
-                    <select name="booking_id" class="form-select" required>
-                        <option value="">Choose Booking</option>
-                        @foreach($bookings as $booking)
-                            <option value="{{ $booking->id }}" {{ (string) old('booking_id') === (string) $booking->id ? 'selected' : '' }}>
-                                #{{ $booking->id }} -
-                                {{ $booking->hall->name ?? 'Hall' }} -
-                                {{ optional($booking->customer)->name ?? optional($booking->user)->name ?? 'N/A' }} -
-                                {{ $booking->formatted_datetime_range }}
-                            </option>
-                        @endforeach
-                    </select>
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title text-white" id="cancelModalTitle"><i class="bx bx-error-circle me-1"></i> Confirm Cancellation</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> You are about to cancel the booking for <strong id="modal_event_name">...</strong> at <strong id="modal_hall_name">...</strong>. This action will immediately free the time slot.
+                    </div>
 
-                <div class="mb-4">
-                    <h5 class="mb-3">Cancellation Details</h5>
+                    <h6 class="mb-3 mt-4">Please provide a reason for cancellation:</h6>
 
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="radio" name="cancellation_reason_option" id="reason_postponded" value="postponded" {{ old('cancellation_reason_option') === 'postponded' ? 'checked' : '' }} required>
-                        <label class="form-check-label" for="reason_postponded">Postponded</label>
+                        <label class="form-check-label" for="reason_postponded">Postponed</label>
                     </div>
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="radio" name="cancellation_reason_option" id="reason_event_cancelled" value="event_cancelled" {{ old('cancellation_reason_option') === 'event_cancelled' ? 'checked' : '' }} required>
@@ -65,18 +117,46 @@
                         <label class="form-check-label" for="reason_other">Other</label>
                     </div>
 
-                    <label for="cancellation_reason_other" class="form-label">Other Reason (if selected)</label>
-                    <textarea id="cancellation_reason_other" name="cancellation_reason_other" rows="3" class="form-control" placeholder="Enter your reason">{{ old('cancellation_reason_other') }}</textarea>
+                    <div id="other_reason_container" class="{{ old('cancellation_reason_option') === 'other' ? '' : 'd-none' }}">
+                        <label for="cancellation_reason_other" class="form-label mt-2">Other Reason (required if selected)</label>
+                        <textarea id="cancellation_reason_other" name="cancellation_reason_other" rows="3" class="form-control" placeholder="Enter your detailed reason here">{{ old('cancellation_reason_other') }}</textarea>
+                    </div>
                 </div>
-
-                <div>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bx bx-x-circle"></i> Submit Cancellation
-                    </button>
-                    <a href="{{ route('admin.bookings.index') }}" class="btn btn-secondary">Back</a>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    function openCancelModal(bookingId, eventName, hallName) {
+        document.getElementById('modal_booking_id').value = bookingId;
+        document.getElementById('modal_event_name').textContent = eventName;
+        document.getElementById('modal_hall_name').textContent = hallName;
+
+        // Reset the form
+        document.querySelectorAll('input[name="cancellation_reason_option"]').forEach(el => el.checked = false);
+        document.getElementById('cancellation_reason_other').value = '';
+        document.getElementById('other_reason_container').classList.add('d-none');
+
+        var myModal = new bootstrap.Modal(document.getElementById('cancelBookingModal'));
+        myModal.show();
+    }
+
+    // Toggle other reason textarea visibility
+    document.querySelectorAll('input[name="cancellation_reason_option"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const otherContainer = document.getElementById('other_reason_container');
+            if (this.value === 'other' && this.checked) {
+                otherContainer.classList.remove('d-none');
+            } else {
+                otherContainer.classList.add('d-none');
+                document.getElementById('cancellation_reason_other').value = '';
+            }
+        });
+    });
+</script>
 @endsection

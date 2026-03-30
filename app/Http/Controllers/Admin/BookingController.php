@@ -76,12 +76,25 @@ class BookingController extends Controller
     /**
      * Show create form
      */
-    public function create()
+    public function create(Request $request)
     {
-        $halls = Hall::where('status', 'available')->get();
+        $halls = Hall::where('status', 'available')
+            ->with('images')
+            ->get();
         $customers = User::where('role', 'user')->get();
 
-        return view('admin.bookings.create', compact('halls', 'customers'));
+        $selectedHallId = $request->query('hall_id');
+        $selectedHall = null;
+
+        if ($selectedHallId && !$halls->pluck('id')->contains((int) $selectedHallId)) {
+            $selectedHallId = null;
+        }
+
+        if ($selectedHallId) {
+            $selectedHall = $halls->firstWhere('id', (int) $selectedHallId);
+        }
+
+        return view('admin.bookings.create', compact('halls', 'customers', 'selectedHallId', 'selectedHall'));
     }
 
     /**
@@ -384,8 +397,33 @@ class BookingController extends Controller
         $endDatetime = $request->query('end_datetime');
         $excludeId = $request->query('exclude_id');
 
+        // Only fetch booked ranges when both dates are selected
+        $bookedRanges = [];
+        if ($hallId && $startDatetime && $endDatetime) {
+            $query = Booking::where('hall_id', $hallId)
+                ->where('booking_status', '!=', 'cancelled');
+
+            // Only show bookings that overlap with the selected date range
+            $rangeStart = Carbon::parse($startDatetime)->subDays(1);
+            $rangeEnd = Carbon::parse($endDatetime)->addDays(1);
+            $query->where('start_datetime', '<', $rangeEnd)
+                  ->where('end_datetime', '>', $rangeStart);
+
+            $bookedRanges = $query->get()
+                ->map(function ($b) {
+                    return [
+                        'start' => Carbon::parse($b->start_datetime)->format('d M h:i A'),
+                        'end' => Carbon::parse($b->end_datetime)->format('d M h:i A'),
+                        'name' => $b->event_name
+                    ];
+                });
+        }
+
         if (!$hallId || !$startDatetime || !$endDatetime) {
-            return response()->json(['available' => true]);
+            return response()->json([
+                'available' => true,
+                'booked_ranges' => $bookedRanges
+            ]);
         }
 
         $newStart = Carbon::parse($startDatetime);
@@ -395,18 +433,16 @@ class BookingController extends Controller
             return response()->json([
                 'available' => false,
                 'message' => 'End date/time must be after start date/time.',
+                'booked_ranges' => $bookedRanges
             ]);
         }
 
         $availability = Booking::isSlotAvailable($hallId, $newStart, $newEnd, $excludeId);
 
-        if (!$availability['available']) {
-            return response()->json([
-                'available' => false,
-                'message' => $availability['message'],
-            ]);
-        }
-
-        return response()->json(['available' => true]);
+        return response()->json([
+            'available' => $availability['available'],
+            'message' => $availability['message'],
+            'booked_ranges' => $bookedRanges
+        ]);
     }
 }
