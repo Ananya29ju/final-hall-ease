@@ -39,8 +39,8 @@
                                 <th>User</th>
                                 <th>Hall</th>
                                 <th>Event</th>
-                                <th>Date</th>
-                                <th>Time</th>
+                                <th>Date / Time</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -50,8 +50,12 @@
                                     <td>{{ $booking->customer->name ?? $booking->user->name ?? 'N/A' }}</td>
                                     <td>{{ $booking->hall->name ?? 'N/A' }}</td>
                                     <td>{{ $booking->event_name ?? 'N/A' }}</td>
-                                    <td>{{ optional($booking->event_date)->format('M d, Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}</td>
+                                    <td>{{ $booking->formatted_datetime_range }}</td>
+                                    <td>
+                                        <a href="{{ route('media.bookings.index') }}" class="btn btn-sm btn-label-primary">
+                                            <i class="bx bx-show-alt me-1"></i> View
+                                        </a>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>

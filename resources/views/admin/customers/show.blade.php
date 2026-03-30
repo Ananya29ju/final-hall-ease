@@ -52,14 +52,14 @@
                         <thead>
                             <tr>
                                 <th>Hall</th>
-                                <th>Event Date</th>
+                                <th>Booking Period</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($bookings as $booking)
                                 <tr>
                                     <td>{{ $booking->hall->name }}</td>
-                                    <td>{{ $booking->event_date->format('M d, Y') }}</td>
+                                    <td>{{ $booking->formatted_datetime_range }}</td>
                                 </tr>
                             @empty
                                 <tr>

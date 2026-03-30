@@ -72,6 +72,36 @@
         color: #5d6674;
     }
 
+    .datetime-range-group {
+        border: 1px solid #e8edf4;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        background: #f9fbff;
+        position: relative;
+    }
+
+    .datetime-range-group .range-label {
+        position: absolute;
+        top: -0.65rem;
+        left: 1rem;
+        background: #f9fbff;
+        padding: 0 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #696cff;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .datetime-range-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #696cff;
+        padding: 0.5rem 0;
+    }
+
     @media (max-width: 768px) {
         .selected-hall-hero .hall-photo,
         .selected-hall-hero .hall-photo-single {
@@ -204,9 +234,9 @@
             @csrf
 
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-md-12 mb-3">
                     <label class="form-label">Select Hall</label>
-                    <select name="hall_id" class="form-select" required>
+                    <select name="hall_id" id="hall_id" class="form-select" required>
                         <option value="">Choose Hall</option>
                         @foreach($halls as $hall)
                             <option value="{{ $hall->id }}" {{ (string) old('hall_id', $selectedHallId ?? '') === (string) $hall->id ? 'selected' : '' }}>
@@ -215,21 +245,57 @@
                         @endforeach
                     </select>
                 </div>
+            </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Event Date</label>
-                    <input type="date" name="event_date" value="{{ old('event_date') }}" class="form-control" required>
+            {{-- Start Date/Time → End Date/Time --}}
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="datetime-range-group mb-3">
+                        <span class="range-label"><i class="bx bx-log-in-circle me-1"></i> Start</span>
+                        <div class="row mt-2">
+                            <div class="col-sm-6 mb-2 mb-sm-0">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" name="start_date" id="start_date" value="{{ old('start_date') }}" class="form-control" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" name="start_time" id="start_time" value="{{ old('start_time') }}" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Start Time</label>
-                    <input type="time" name="start_time" value="{{ old('start_time') }}" class="form-control" required>
+                <div class="col-md-2 datetime-range-arrow">
+                    <i class="bx bx-right-arrow-alt"></i>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">End Time</label>
-                    <input type="time" name="end_time" value="{{ old('end_time') }}" class="form-control" required>
+                <div class="col-md-5">
+                    <div class="datetime-range-group mb-3">
+                        <span class="range-label"><i class="bx bx-log-out-circle me-1"></i> End</span>
+                        <div class="row mt-2">
+                            <div class="col-sm-6 mb-2 mb-sm-0">
+                                <label class="form-label">End Date</label>
+                                <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}" class="form-control" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">End Time</label>
+                                <input type="time" name="end_time" id="end_time" value="{{ old('end_time') }}" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <div id="booked-slots-container" class="mb-4 d-none">
+                <label class="form-label text-danger fw-bold"><i class="bx bx-calendar-event me-1"></i> Already Booked Slots (30-min buffer required):</label>
+                <div id="booked-slots-list" class="d-flex flex-wrap gap-2">
+                    <!-- Booked slots will be injected here -->
+                </div>
+            </div>
+
+            <div id="availability-warning" class="alert alert-danger d-none mt-2">
+                <i class="bx bx-error me-1"></i>
+                <span id="availability-message"></span>
             </div>
 
             <hr class="my-4">
@@ -367,6 +433,10 @@
                     <i class="bx bx-save"></i> Submit Booking Request
                 </button>
 
+                <button type="button" id="join-waitlist-btn" class="btn btn-info d-none">
+                    <i class="bx bx-time-five"></i> This slot is used. Join Waitlist
+                </button>
+
                 <a href="{{ route('user.dashboard') }}" class="btn btn-secondary">
                     Cancel
                 </a>
@@ -375,4 +445,123 @@
     </div>
 </div>
 
+@endsection
+
+@section('page-script')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hallSelect = document.getElementById('hall_id');
+    const startDateInput = document.getElementById('start_date');
+    const startTimeInput = document.getElementById('start_time');
+    const endDateInput = document.getElementById('end_date');
+    const endTimeInput = document.getElementById('end_time');
+    const warningDiv = document.getElementById('availability-warning');
+    const warningMsg = document.getElementById('availability-message');
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const waitlistBtn = document.getElementById('join-waitlist-btn');
+    const bookingForm = document.querySelector('form[action="{{ route('user.bookings.store') }}"]');
+
+    const bookedSlotsContainer = document.getElementById('booked-slots-container');
+    const bookedSlotsList = document.getElementById('booked-slots-list');
+
+    // Auto-set end_date when start_date changes (if end_date is empty or before start_date)
+    startDateInput.addEventListener('change', function() {
+        if (!endDateInput.value || endDateInput.value < startDateInput.value) {
+            endDateInput.value = startDateInput.value;
+        }
+    });
+
+    // Validate end date is not before start date
+    endDateInput.addEventListener('change', function() {
+        if (endDateInput.value < startDateInput.value) {
+            endDateInput.value = startDateInput.value;
+        }
+    });
+
+    function buildDatetime(dateVal, timeVal) {
+        if (!dateVal || !timeVal) return null;
+        return dateVal + 'T' + timeVal + ':00';
+    }
+
+    function checkAvailability() {
+        const hallId = hallSelect.value;
+        const startDate = startDateInput.value;
+        const startTime = startTimeInput.value;
+        const endDate = endDateInput.value;
+        const endTime = endTimeInput.value;
+
+        const startDt = buildDatetime(startDate, startTime);
+        const endDt = buildDatetime(endDate, endTime);
+
+        // Client-side validation: end must be after start
+        if (startDt && endDt && endDt <= startDt) {
+            warningMsg.innerText = 'End date/time must be after start date/time.';
+            warningDiv.classList.remove('d-none');
+            submitBtn.classList.add('d-none');
+            waitlistBtn.classList.add('d-none');
+            bookedSlotsContainer.classList.add('d-none');
+            return;
+        }
+
+        if (hallId) {
+            let url = `{{ route('user.bookings.check-availability') }}?hall_id=${hallId}`;
+            if (startDt) url += `&start_datetime=${encodeURIComponent(startDt)}`;
+            if (endDt) url += `&end_datetime=${encodeURIComponent(endDt)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Render booked ranges
+                    bookedSlotsList.innerHTML = '';
+                    if (data.booked_ranges && data.booked_ranges.length > 0) {
+                        data.booked_ranges.forEach(range => {
+                            const badge = document.createElement('span');
+                            badge.className = 'badge bg-label-danger border border-danger p-2';
+                            badge.innerHTML = `<i class="bx bx-time-five me-1"></i> ${range.start} → ${range.end} (${range.name})`;
+                            bookedSlotsList.appendChild(badge);
+                        });
+                        bookedSlotsContainer.classList.remove('d-none');
+                    } else {
+                        bookedSlotsContainer.classList.add('d-none');
+                    }
+
+                    // Check availability only if we have all four fields
+                    if (startDt && endDt) {
+                        if (!data.available) {
+                            warningMsg.innerText = data.message;
+                            warningDiv.classList.remove('d-none');
+                            submitBtn.classList.add('d-none');
+                            waitlistBtn.classList.remove('d-none');
+                        } else {
+                            warningDiv.classList.add('d-none');
+                            submitBtn.classList.remove('d-none');
+                            waitlistBtn.classList.add('d-none');
+                        }
+                    } else {
+                        warningDiv.classList.add('d-none');
+                        submitBtn.classList.remove('d-none');
+                        waitlistBtn.classList.add('d-none');
+                    }
+                })
+                .catch(error => console.error('Error fetching availability:', error));
+        } else {
+            warningDiv.classList.add('d-none');
+            bookedSlotsContainer.classList.add('d-none');
+            submitBtn.classList.remove('d-none');
+            waitlistBtn.classList.add('d-none');
+        }
+    }
+
+    waitlistBtn.addEventListener('click', function() {
+        if (confirm('Move this request to the Waitlist? We will notify you if it becomes available.')) {
+            bookingForm.action = "{{ route('user.waitlist.join') }}";
+            bookingForm.submit();
+        }
+    });
+
+    [hallSelect, startDateInput, startTimeInput, endDateInput, endTimeInput].forEach(el => {
+        el.addEventListener('change', checkAvailability);
+    });
+});
+</script>
 @endsection

@@ -29,6 +29,11 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class);
     }
 
+    public function waitlists()
+    {
+        return $this->hasMany(Waitlist::class);
+    }
+
     // ⭐ helper (useful in middleware later)
     public function isAdmin()
     {

@@ -29,7 +29,7 @@ class DashboardController extends Controller
         $myBookingsQuery = Booking::query();
         $upcomingBookingsQuery = Booking::query();
         $calendarBookingsQuery = Booking::with(['hall', 'customer', 'user'])
-            ->whereNotNull('event_date');
+            ->whereNotNull('start_datetime');
 
         if ($ownerColumn) {
             $myBookingsQuery->where($ownerColumn, $user->id);
@@ -53,7 +53,7 @@ class DashboardController extends Controller
         $data = [
             'my_bookings' => $myBookingsQuery->count(),
             'upcoming_bookings' => $upcomingBookingsQuery
-                ->whereDate('event_date', '>=', now()->toDateString())
+                ->where('start_datetime', '>=', now())
                 ->count(),
             'available_halls' => Hall::where('status', 'available')->count(),
             'total_halls' => Hall::count(),
@@ -64,26 +64,14 @@ class DashboardController extends Controller
                 ->orderBy('campus_name')
                 ->pluck('campus_name'),
             'calendar_bookings' => $calendarBookingsQuery
-                ->orderBy('event_date')
-                ->orderBy('start_time')
+                ->orderBy('start_datetime')
                 ->get()
                 ->map(function (Booking $booking) {
-                    $formatTime = static function ($value): string {
-                        if (blank($value)) {
-                            return '--:--';
-                        }
-
-                        try {
-                            return Carbon::parse($value)->format('H:i');
-                        } catch (\Throwable $e) {
-                            return (string) $value;
-                        }
-                    };
-
                     return [
-                        'date' => optional($booking->event_date)->format('Y-m-d'),
-                        'start_time' => $formatTime($booking->start_time),
-                        'end_time' => $formatTime($booking->end_time),
+                        'date' => optional($booking->start_datetime)->format('Y-m-d'),
+                        'start_time' => optional($booking->start_datetime)->format('H:i'),
+                        'end_time' => optional($booking->end_datetime)->format('H:i'),
+                        'end_date' => optional($booking->end_datetime)->format('Y-m-d'),
                         'event_name' => $booking->event_name ?: 'Event',
                         'hall_name' => optional($booking->hall)->name ?: 'Hall',
                         'booked_by' => $booking->coordinator_name ?: (optional($booking->customer)->name ?: (optional($booking->user)->name ?: 'N/A')),

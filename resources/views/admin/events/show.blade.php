@@ -29,12 +29,8 @@
                             <td><strong>{{ $event->event_name ?? 'N/A' }}</strong></td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Event Date</td>
-                            <td><strong>{{ $event->event_date->format('M d, Y') }}</strong></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Time</td>
-                            <td><strong>{{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($event->end_time)->format('H:i') }}</strong></td>
+                            <td class="text-muted">Booking Period</td>
+                            <td><strong>{{ $event->formatted_datetime_range }}</strong></td>
                         </tr>
                     </table>
                 </div>

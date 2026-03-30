@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\User;
 use App\Models\Hall;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Booking>
@@ -18,18 +19,20 @@ class BookingFactory extends Factory
      */
     public function definition(): array
     {
-        $startTime = fake()->time('H:i:s');
-        $eventDate = fake()->dateTimeBetween('+2 days', '+60 days');
+        $startDatetime = Carbon::parse(fake()->dateTimeBetween('+2 days', '+60 days'))
+            ->setHour(fake()->numberBetween(8, 18))
+            ->setMinute(fake()->randomElement([0, 30]))
+            ->setSecond(0);
+
+        $durationHours = fake()->numberBetween(1, 8);
+        $endDatetime = (clone $startDatetime)->addHours($durationHours);
 
         return [
             'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'hall_id' => Hall::inRandomOrder()->first()?->id ?? Hall::factory(),
-            'event_date' => $eventDate,
-            'start_time' => $startTime,
-            'end_time' => date('H:i:s', strtotime('+6 hours', strtotime($startTime))),
-            'total_amount' => fake()->numberBetween(50000, 300000),
+            'start_datetime' => $startDatetime,
+            'end_datetime' => $endDatetime,
             'booking_status' => fake()->randomElement(['pending', 'confirmed', 'cancelled']),
-            'payment_status' => fake()->randomElement(['unpaid', 'paid']),
         ];
     }
 
@@ -40,7 +43,6 @@ class BookingFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'booking_status' => 'confirmed',
-            'payment_status' => 'paid',
         ]);
     }
 
@@ -51,7 +53,6 @@ class BookingFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'booking_status' => 'pending',
-            'payment_status' => 'unpaid',
         ]);
     }
 }

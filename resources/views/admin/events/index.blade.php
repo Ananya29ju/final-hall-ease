@@ -15,8 +15,7 @@
                         <thead>
                             <tr>
                                 <th>Event Name</th>
-                                <th>Event Date</th>
-                                <th>Time</th>
+                                <th>Booking Period</th>
                                 <th>Hall</th>
                                 <th>Staff</th>
                                 <th>Actions</th>
@@ -26,8 +25,7 @@
                             @forelse ($events as $event)
                                 <tr>
                                     <td>{{ $event->event_name ?? 'N/A' }}</td>
-                                    <td>{{ $event->event_date->format('M d, Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($event->end_time)->format('H:i') }}</td>
+                                    <td>{{ $event->formatted_datetime_range }}</td>
                                     <td>{{ $event->hall->name }}</td>
                                     <td>{{ optional($event->customer)->name ?? optional($event->user)->name ?? 'N/A' }}</td>
                                     <td>

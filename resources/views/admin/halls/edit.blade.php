@@ -35,9 +35,9 @@
                             <select class="form-control @error('campus_name') is-invalid @enderror" id="campus_name" name="campus_name" required>
                                 <option value="">Select Campus</option>
                                 <option value="Main Campus" {{ old('campus_name', $hall->campus_name) === 'Main Campus' ? 'selected' : '' }}>Main Campus</option>
-                                <option value="AIMT Campus" {{ old('campus_name', $hall->campus_name) === 'AIMT Campus' ? 'selected' : '' }}>AIMT Campus</option>
+                                <option value="AIMIT Campus" {{ old('campus_name', $hall->campus_name) === 'AIMIT Campus' ? 'selected' : '' }}>AIMIT Campus</option>
                                 <option value="Engineering Campus" {{ old('campus_name', $hall->campus_name) === 'Engineering Campus' ? 'selected' : '' }}>Engineering Campus</option>
-                                <option value="Capitanio Campus" {{ old('campus_name', $hall->campus_name) === 'Capitanio Campus' ? 'selected' : '' }}>Capitanio Campus</option>
+                                <option value="Capitano Campus" {{ old('campus_name', $hall->campus_name) === 'Capitano Campus' ? 'selected' : '' }}>Capitano Campus</option>
                             </select>
                             @error('campus_name')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -46,7 +46,14 @@
 
                         <div class="form-group mb-3">
                             <label for="location" class="form-label">Block *</label>
-                            <input type="text" class="form-control @error('location') is-invalid @enderror" id="location" name="location" value="{{ old('location', $hall->location) }}" required />
+                            <select class="form-control @error('location') is-invalid @enderror" id="location" name="location" required>
+                                <option value="">Select Block</option>
+                                <option value="Admin" {{ old('location', $hall->location) === 'Admin' ? 'selected' : '' }}>Admin</option>
+                                <option value="Aruppe" {{ old('location', $hall->location) === 'Aruppe' ? 'selected' : '' }}>Aruppe</option>
+                                <option value="Maffie" {{ old('location', $hall->location) === 'Maffie' ? 'selected' : '' }}>Maffie</option>
+                                <option value="Xavier" {{ old('location', $hall->location) === 'Xavier' ? 'selected' : '' }}>Xavier</option>
+                                <option value="LCRI" {{ old('location', $hall->location) === 'LCRI' ? 'selected' : '' }}>LCRI</option>
+                            </select>
                             @error('location')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

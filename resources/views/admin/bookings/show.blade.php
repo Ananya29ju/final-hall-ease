@@ -21,12 +21,8 @@
                             <td><strong>{{ optional($booking->customer)->name ?? optional($booking->user)->name ?? 'N/A' }}</strong></td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Event Date</td>
-                            <td><strong>{{ $booking->event_date->format('M d, Y') }}</strong></td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Time</td>
-                            <td><strong>{{ $booking->start_time }} - {{ $booking->end_time }}</strong></td>
+                            <td class="text-muted">Booking Period</td>
+                            <td><strong>{{ $booking->formatted_datetime_range }}</strong></td>
                         </tr>
                         <tr>
                             <td class="text-muted">Status</td>

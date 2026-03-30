@@ -22,6 +22,13 @@
             </a>
         </li>
 
+        <li class="menu-item mb-2 {{ request()->routeIs('media.bookings.*') ? 'active' : '' }}">
+            <a href="{{ route('media.bookings.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-calendar"></i>
+                <div>Bookings</div>
+            </a>
+        </li>
+
         <li class="menu-item mb-2 {{ request()->routeIs('media.notifications.*') ? 'active' : '' }}">
             <a href="{{ route('media.notifications.index') }}" class="menu-link d-flex justify-content-between align-items-center">
                 <span>

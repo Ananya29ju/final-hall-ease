@@ -2,6 +2,40 @@
 
 @section('title', 'Create Booking')
 
+@section('page-style')
+<style>
+    .datetime-range-group {
+        border: 1px solid #e8edf4;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        background: #f9fbff;
+        position: relative;
+    }
+
+    .datetime-range-group .range-label {
+        position: absolute;
+        top: -0.65rem;
+        left: 1rem;
+        background: #f9fbff;
+        padding: 0 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #696cff;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    .datetime-range-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #696cff;
+        padding: 0.5rem 0;
+    }
+</style>
+@endsection
+
 @section('content')
 
 <div class="card">
@@ -28,7 +62,7 @@
                 {{-- Hall --}}
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Select Hall</label>
-                    <select name="hall_id" class="form-select" required>
+                    <select name="hall_id" id="hall_id" class="form-select" required>
                         <option value="">Choose Hall</option>
                         @foreach($halls as $hall)
                             <option value="{{ $hall->id }}" {{ old('hall_id') == $hall->id ? 'selected' : '' }}>
@@ -51,24 +85,45 @@
                     </select>
                 </div>
 
-                {{-- Event Date --}}
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Event Date</label>
-                    <input type="date" name="event_date" value="{{ old('event_date') }}" class="form-control" required>
+            </div>
+
+            {{-- Start Date/Time → End Date/Time --}}
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="datetime-range-group mb-3">
+                        <span class="range-label"><i class="bx bx-log-in-circle me-1"></i> Start</span>
+                        <div class="row mt-2">
+                            <div class="col-sm-6 mb-2 mb-sm-0">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" name="start_date" id="start_date" value="{{ old('start_date') }}" class="form-control" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" name="start_time" id="start_time" value="{{ old('start_time') }}" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {{-- Start Time --}}
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Start Time</label>
-                    <input type="time" name="start_time" value="{{ old('start_time') }}" class="form-control" required>
+                <div class="col-md-2 datetime-range-arrow">
+                    <i class="bx bx-right-arrow-alt"></i>
                 </div>
 
-                {{-- End Time --}}
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">End Time</label>
-                    <input type="time" name="end_time" value="{{ old('end_time') }}" class="form-control" required>
+                <div class="col-md-5">
+                    <div class="datetime-range-group mb-3">
+                        <span class="range-label"><i class="bx bx-log-out-circle me-1"></i> End</span>
+                        <div class="row mt-2">
+                            <div class="col-sm-6 mb-2 mb-sm-0">
+                                <label class="form-label">End Date</label>
+                                <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}" class="form-control" required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">End Time</label>
+                                <input type="time" name="end_time" id="end_time" value="{{ old('end_time') }}" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
             </div>
 
             <hr class="my-4">
@@ -201,6 +256,11 @@
                 </label>
             </div>
 
+            <div id="availability-warning" class="alert alert-warning d-none">
+                <i class="bx bx-error me-1"></i>
+                <span id="availability-message"></span>
+            </div>
+
             <div class="mt-3">
                 <button type="submit" class="btn btn-primary">
                     <i class="bx bx-save"></i> Save Booking
@@ -217,4 +277,76 @@
     </div>
 </div>
 
+@endsection
+
+@section('page-script')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hallSelect = document.getElementById('hall_id');
+    const startDateInput = document.getElementById('start_date');
+    const startTimeInput = document.getElementById('start_time');
+    const endDateInput = document.getElementById('end_date');
+    const endTimeInput = document.getElementById('end_time');
+    const warningDiv = document.getElementById('availability-warning');
+    const warningMsg = document.getElementById('availability-message');
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    // Auto-set end_date when start_date changes
+    startDateInput.addEventListener('change', function() {
+        if (!endDateInput.value || endDateInput.value < startDateInput.value) {
+            endDateInput.value = startDateInput.value;
+        }
+    });
+
+    endDateInput.addEventListener('change', function() {
+        if (endDateInput.value < startDateInput.value) {
+            endDateInput.value = startDateInput.value;
+        }
+    });
+
+    function buildDatetime(dateVal, timeVal) {
+        if (!dateVal || !timeVal) return null;
+        return dateVal + 'T' + timeVal + ':00';
+    }
+
+    function checkAvailability() {
+        const hallId = hallSelect.value;
+        const startDt = buildDatetime(startDateInput.value, startTimeInput.value);
+        const endDt = buildDatetime(endDateInput.value, endTimeInput.value);
+
+        // Client-side validation
+        if (startDt && endDt && endDt <= startDt) {
+            warningMsg.innerText = 'End date/time must be after start date/time.';
+            warningDiv.classList.remove('d-none');
+            submitBtn.disabled = true;
+            return;
+        }
+
+        if (hallId && startDt && endDt) {
+            const url = `{{ route('admin.bookings.check-availability') }}?hall_id=${hallId}&start_datetime=${encodeURIComponent(startDt)}&end_datetime=${encodeURIComponent(endDt)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.available) {
+                        warningMsg.innerText = data.message;
+                        warningDiv.classList.remove('d-none');
+                        submitBtn.disabled = true;
+                    } else {
+                        warningDiv.classList.add('d-none');
+                        submitBtn.disabled = false;
+                    }
+                })
+                .catch(error => console.error('Error fetching availability:', error));
+        } else {
+            warningDiv.classList.add('d-none');
+            submitBtn.disabled = false;
+        }
+    }
+
+    [hallSelect, startDateInput, startTimeInput, endDateInput, endTimeInput].forEach(el => {
+        el.addEventListener('change', checkAvailability);
+    });
+});
+</script>
 @endsection

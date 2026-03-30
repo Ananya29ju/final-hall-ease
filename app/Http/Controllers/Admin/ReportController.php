@@ -36,7 +36,7 @@ class ReportController extends Controller
     public function bookings()
     {
         $bookings = Booking::with(['user', 'hall'])
-            ->orderBy('event_date', 'desc')
+            ->orderBy('start_datetime', 'desc')
             ->paginate(10);
 
         return view('admin.reports.bookings', compact('bookings'));

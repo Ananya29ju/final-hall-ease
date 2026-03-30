@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Booking;
 use App\Models\Hall;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -24,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useBootstrapFive();
+
         View::composer('layouts.sections.navbar.navbar-partial', function ($view) {
             $campusGroups = collect();
             $hallsTable = (new Hall())->getTable();

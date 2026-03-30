@@ -47,16 +47,15 @@ class NotificationController extends Controller
         }
 
         $upcomingReminders = (clone $baseQuery)
-            ->whereDate('event_date', '>=', now()->toDateString())
-            ->whereDate('event_date', '<=', now()->addDays(7)->toDateString())
+            ->where('start_datetime', '>=', now())
+            ->where('start_datetime', '<=', now()->addDays(7))
             ->when($hasCancellationReason, function ($query) {
                 $query->where(function ($q) {
                     $q->whereNull('cancellation_reason')
                         ->orWhere('cancellation_reason', '');
                 });
             })
-            ->orderBy('event_date')
-            ->orderBy('start_time')
+            ->orderBy('start_datetime')
             ->take(20)
             ->get();
 
@@ -90,18 +89,13 @@ class NotificationController extends Controller
 
         $latestUpdates = $latestUpdates->merge(
             $upcomingReminders->map(function (Booking $booking) {
-                $eventDateTime = optional($booking->event_date)
-                    ? $booking->event_date->copy()->setTimeFromTimeString((string) $booking->start_time)
-                    : now();
-
                 return [
                     'type' => 'Upcoming Reminder',
                     'type_class' => 'warning',
                     'hall_name' => optional($booking->hall)->name ?? 'N/A',
                     'event_name' => $booking->event_name ?? 'N/A',
-                    'details' => 'Event scheduled on ' . optional($booking->event_date)->format('M d, Y')
-                        . ' (' . $booking->start_time . '-' . $booking->end_time . ').',
-                    'time' => $eventDateTime,
+                    'details' => 'Event scheduled: ' . $booking->formatted_datetime_range,
+                    'time' => $booking->start_datetime,
                 ];
             })
         );

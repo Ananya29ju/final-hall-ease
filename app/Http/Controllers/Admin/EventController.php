@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Carbon;
 
 class EventController extends Controller
 {
@@ -21,8 +22,7 @@ class EventController extends Controller
         }
 
         $events = $eventsQuery
-            ->latest('event_date')
-            ->latest('start_time')
+            ->latest('start_datetime')
             ->paginate(10);
         return view('admin.events.index', compact('events'));
     }
@@ -42,9 +42,8 @@ class EventController extends Controller
     public function update(Request $request, Booking $event)
     {
         $validated = $request->validate([
-            'event_date' => 'date',
-            'start_time' => 'date_format:H:i:s',
-            'end_time' => 'date_format:H:i:s',
+            'start_datetime' => 'date',
+            'end_datetime' => 'date|after:start_datetime',
             'booking_status' => 'in:pending,confirmed,cancelled',
         ]);
 

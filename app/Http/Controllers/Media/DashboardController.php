@@ -29,14 +29,13 @@ class DashboardController extends Controller
      */
     private function newBookingsQuery()
     {
-        $bookingsTable = (new Booking())->getTable();
-        $query = Booking::with(['hall', 'customer', 'user']);
+        $query = Booking::with(['hall', 'customer', 'user'])
+            ->where('admin_status', 'approved')
+            ->whereNotNull('media_requirements')
+            ->where('media_requirements', '!=', '[]')
+            ->whereIn('booking_status', ['waiting for media', 'confirmed', 'confirmed without media']);
 
-        if (Schema::hasColumn($bookingsTable, 'booking_status')) {
-            $query->where('booking_status', 'confirmed');
-        }
-
-        if (Schema::hasColumn($bookingsTable, 'cancellation_reason')) {
+        if (Schema::hasColumn((new Booking())->getTable(), 'cancellation_reason')) {
             $query->where(function ($builder) {
                 $builder->whereNull('cancellation_reason')
                     ->orWhere('cancellation_reason', '');

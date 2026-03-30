@@ -39,8 +39,7 @@
                                 #{{ $booking->id }} -
                                 {{ $booking->hall->name ?? 'Hall' }} -
                                 {{ optional($booking->customer)->name ?? optional($booking->user)->name ?? 'N/A' }} -
-                                {{ optional($booking->event_date)->format('M d, Y') }}
-                                ({{ $booking->start_time }}-{{ $booking->end_time }})
+                                {{ $booking->formatted_datetime_range }}
                             </option>
                         @endforeach
                     </select>

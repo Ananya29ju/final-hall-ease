@@ -20,14 +20,27 @@
                     </div>
                     <div class="card-body">
                         @if ($blocks->isNotEmpty())
-                            <div class="d-flex flex-wrap gap-2">
-                                @foreach ($blocks as $block)
-                                    <a href="{{ route('user.halls.block', ['campus' => $campus, 'block' => $block]) }}"
-                                       class="btn btn-outline-primary btn-sm">
-                                        {{ $block }}
-                                    </a>
-                                @endforeach
-                            </div>
+                            @if ($campus === 'Main Campus')
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-primary dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="dropdownMenuButton{{ str($campus)->slug() }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Select Block
+                                    </button>
+                                    <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton{{ str($campus)->slug() }}">
+                                        @foreach ($blocks as $block)
+                                            <a class="dropdown-item" href="{{ route('user.halls.block', ['campus' => $campus, 'block' => $block]) }}">{{ $block }}</a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach ($blocks as $block)
+                                        <a href="{{ route('user.halls.block', ['campus' => $campus, 'block' => $block]) }}"
+                                           class="btn btn-outline-primary btn-sm">
+                                            {{ $block }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
                         @else
                             <p class="text-muted mb-0">No blocks available.</p>
                         @endif

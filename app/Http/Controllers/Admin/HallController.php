@@ -34,8 +34,8 @@ class HallController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'campus_name' => 'required|in:Main Campus,AIMT Campus,Engineering Campus,Capitanio Campus',
-            'location' => 'required|string|max:255',
+            'campus_name' => 'required|in:Main Campus,AIMIT Campus,Engineering Campus,Capitano Campus',
+            'location' => 'required|in:Admin,Aruppe,Maffie,Xavier,LCRI',
             'capacity' => 'required|integer|min:10',
             'description' => 'nullable|string',
             'status' => 'in:available,maintenance',
@@ -107,8 +107,8 @@ class HallController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'campus_name' => 'required|in:Main Campus,AIMT Campus,Engineering Campus,Capitanio Campus',
-            'location' => 'required|string|max:255',
+            'campus_name' => 'required|in:Main Campus,AIMIT Campus,Engineering Campus,Capitano Campus',
+            'location' => 'required|in:Admin,Aruppe,Maffie,Xavier,LCRI',
             'capacity' => 'required|integer|min:10',
             'description' => 'nullable|string',
             'status' => 'in:available,maintenance',

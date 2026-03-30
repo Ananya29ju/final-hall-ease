@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Carbon;
+use App\Notifications\BookingStatusUpdated;
 
 class BookingController extends Controller
 {
@@ -19,12 +21,12 @@ class BookingController extends Controller
     {
         $bookingsTable = (new Booking())->getTable();
         $hasCancellationReason = Schema::hasColumn($bookingsTable, 'cancellation_reason');
-        $today = now()->toDateString();
+        $now = now();
 
         $baseQuery = Booking::with(['hall', 'customer', 'user']);
 
         $upcomingQuery = clone $baseQuery;
-        $upcomingQuery->whereDate('event_date', '>=', $today);
+        $upcomingQuery->where('start_datetime', '>=', $now);
         if (Schema::hasColumn($bookingsTable, 'booking_status')) {
             $upcomingQuery->where('booking_status', '!=', 'cancelled');
         }
@@ -36,7 +38,7 @@ class BookingController extends Controller
         }
 
         $completedQuery = clone $baseQuery;
-        $completedQuery->whereDate('event_date', '<', $today);
+        $completedQuery->where('end_datetime', '<', $now);
         if (Schema::hasColumn($bookingsTable, 'booking_status')) {
             $completedQuery->where('booking_status', '!=', 'cancelled');
         }
@@ -57,10 +59,22 @@ class BookingController extends Controller
             $cancelledQuery->whereRaw('1 = 0');
         }
 
+        $pendingActionBookings = Booking::with(['hall', 'customer', 'user'])
+            ->where('admin_status', 'pending')
+            ->where('booking_status', '!=', 'cancelled')
+            ->latest()
+            ->get();
+
+        $waitlistedBookings = \App\Models\Waitlist::with(['hall', 'user'])
+            ->latest()
+            ->get();
+
         return view('admin.bookings.index', [
-            'upcomingBookings' => $upcomingQuery->latest('event_date')->latest('start_time')->get(),
-            'completedBookings' => $completedQuery->latest('event_date')->latest('start_time')->get(),
-            'cancelledBookings' => $cancelledQuery->latest('event_date')->latest('start_time')->get(),
+            'pendingActionBookings' => $pendingActionBookings,
+            'waitlistedBookings' => $waitlistedBookings,
+            'upcomingBookings' => $upcomingQuery->latest('start_datetime')->get(),
+            'completedBookings' => $completedQuery->latest('start_datetime')->get(),
+            'cancelledBookings' => $cancelledQuery->latest('start_datetime')->get(),
         ]);
     }
 
@@ -83,9 +97,10 @@ class BookingController extends Controller
         $request->validate([
             'hall_id' => 'required|exists:halls,id',
             'customer_id' => 'required|exists:users,id',
-            'event_date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
+            'start_date' => 'required|date|after_or_equal:today',
+            'start_time' => 'required|date_format:H:i',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_time' => 'required|date_format:H:i',
             'event_name' => 'required|string|max:255',
             'event_department' => 'required|string|max:255',
             'event_type' => 'required|string|max:255',
@@ -102,6 +117,17 @@ class BookingController extends Controller
             'resources_other' => 'nullable|string|max:500',
             'details_confirmation' => 'accepted',
         ]);
+
+        // Build full datetime from separate date + time fields
+        $startDatetime = Carbon::parse($request->start_date . ' ' . $request->start_time);
+        $endDatetime = Carbon::parse($request->end_date . ' ' . $request->end_time);
+
+        // Validate end is after start
+        if ($endDatetime->lte($startDatetime)) {
+            return back()
+                ->withErrors(['end_time' => 'End date/time must be after start date/time.'])
+                ->withInput();
+        }
 
         if (
             in_array('others', $request->input('media_requirements', []), true) &&
@@ -121,26 +147,18 @@ class BookingController extends Controller
                 ->withInput();
         }
 
-        // 🔥 Check availability
-        $exists = Booking::where('hall_id', $request->hall_id)
-            ->where('event_date', $request->event_date)
-            ->where(function ($query) use ($request) {
-                $query->whereBetween('start_time', [$request->start_time, $request->end_time])
-                    ->orWhereBetween('end_time', [$request->start_time, $request->end_time]);
-            })
-            ->exists();
-
-        if ($exists) {
-            return back()->with('error', 'Hall already booked for selected time.');
+        // 🔥 Availability check with 30-minute buffer using datetime range
+        $availability = Booking::isSlotAvailable($request->hall_id, $startDatetime, $endDatetime);
+        if (!$availability['available']) {
+            return back()->with('error', $availability['message'])->withInput();
         }
 
         Booking::create([
             'hall_id' => $request->hall_id,
             'customer_id' => $request->customer_id,
             'created_by' => Auth::id(),
-            'event_date' => $request->event_date,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
+            'start_datetime' => $startDatetime,
+            'end_datetime' => $endDatetime,
             'booking_status' => 'confirmed',
             'event_name' => $request->event_name,
             'event_department' => $request->event_department,
@@ -188,15 +206,25 @@ class BookingController extends Controller
         $request->validate([
             'hall_id' => 'required|exists:halls,id',
             'customer_id' => 'required|exists:users,id',
-            'event_date' => 'required|date',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
+            'start_date' => 'required|date',
+            'start_time' => 'required|date_format:H:i',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'end_time' => 'required|date_format:H:i',
             'booking_status' => 'nullable|in:pending,confirmed,cancelled,completed',
             'cancellation_reason' => 'nullable|string',
             'resources' => 'nullable|array',
             'resources.*' => 'in:projectors,sound_systems,lighting,seating,other',
             'resources_other' => 'nullable|string|max:500',
         ]);
+
+        $startDatetime = Carbon::parse($request->start_date . ' ' . $request->start_time);
+        $endDatetime = Carbon::parse($request->end_date . ' ' . $request->end_time);
+
+        if ($endDatetime->lte($startDatetime)) {
+            return back()
+                ->withErrors(['end_time' => 'End date/time must be after start date/time.'])
+                ->withInput();
+        }
 
         if (
             in_array('other', $request->input('resources', []), true) &&
@@ -207,12 +235,17 @@ class BookingController extends Controller
                 ->withInput();
         }
 
+        // 🔥 Check availability (excluding current booking)
+        $availability = Booking::isSlotAvailable($request->hall_id, $startDatetime, $endDatetime, $booking->id);
+        if (!$availability['available']) {
+            return back()->with('error', $availability['message'])->withInput();
+        }
+
         $booking->update([
             'hall_id' => $request->hall_id,
             'customer_id' => $request->customer_id,
-            'event_date' => $request->event_date,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
+            'start_datetime' => $startDatetime,
+            'end_datetime' => $endDatetime,
             'booking_status' => $request->booking_status ?? $booking->booking_status,
             'cancellation_reason' => ($request->booking_status ?? $booking->booking_status) === 'cancelled'
                 ? $request->cancellation_reason
@@ -242,18 +275,45 @@ class BookingController extends Controller
     public function updateStatus(Request $request, Booking $booking)
     {
         $request->validate([
-            'booking_status' => 'required|in:pending,confirmed,cancelled,completed',
-            'cancellation_reason' => 'nullable|string',
+            'admin_status' => 'required|in:approved,rejected,kept_pending',
         ]);
+
+        $adminStatus = $request->admin_status;
+        $bookingStatus = 'pending';
+        $mediaStatus = $booking->media_status;
+
+        if ($adminStatus === 'approved') {
+            if ($booking->requiresMedia()) {
+                $bookingStatus = 'waiting for media';
+                $mediaStatus = 'pending';
+            } else {
+                $bookingStatus = 'confirmed';
+            }
+        } elseif ($adminStatus === 'rejected') {
+            $bookingStatus = 'rejected';
+        }
 
         $booking->update([
-            'booking_status' => $request->booking_status,
-            'cancellation_reason' => $request->booking_status === 'cancelled'
-                ? ($request->cancellation_reason ?: 'Cancelled by admin')
-                : null,
+            'admin_status' => $adminStatus,
+            'booking_status' => $bookingStatus,
+            'media_status' => $mediaStatus,
         ]);
 
-        return back()->with('success', 'Booking status updated.');
+        // 1. Notify Staff
+        $staff = $booking->customer ?: $booking->user;
+        if ($staff) {
+            $staff->notify(new BookingStatusUpdated($booking, 'admin', $adminStatus));
+        }
+
+        // 2. Notify Media Team (only if approved and media required)
+        if ($adminStatus === 'approved' && $booking->requiresMedia()) {
+            $mediaUsers = User::where('role', 'media')->get();
+            foreach ($mediaUsers as $mediaUser) {
+                $mediaUser->notify(new BookingStatusUpdated($booking, 'admin_approved_media', 'approved'));
+            }
+        }
+
+        return back()->with('success', 'Booking status updated successfully.');
     }
 
     /**
@@ -266,8 +326,7 @@ class BookingController extends Controller
         }
 
         $bookings = Booking::with(['hall', 'customer', 'user'])
-            ->latest('event_date')
-            ->latest('start_time')
+            ->latest('start_datetime')
             ->get();
 
         return view('admin.bookings.cancel', compact('bookings'));
@@ -315,8 +374,46 @@ class BookingController extends Controller
             'cancellation_reason' => $reasonText,
         ]);
 
+        \App\Models\Waitlist::notifyNextInWaitlist($booking->hall_id, $booking->start_datetime, $booking->end_datetime);
+
         return redirect()
             ->route('admin.bookings.cancel.form')
             ->with('success', 'Booking cancellation details submitted successfully.');
+    }
+
+    /**
+     * AJAX endpoint to check availability
+     */
+    public function checkAvailability(Request $request)
+    {
+        $hallId = $request->query('hall_id');
+        $startDatetime = $request->query('start_datetime');
+        $endDatetime = $request->query('end_datetime');
+        $excludeId = $request->query('exclude_id');
+
+        if (!$hallId || !$startDatetime || !$endDatetime) {
+            return response()->json(['available' => true]);
+        }
+
+        $newStart = Carbon::parse($startDatetime);
+        $newEnd = Carbon::parse($endDatetime);
+
+        if ($newEnd->lte($newStart)) {
+            return response()->json([
+                'available' => false,
+                'message' => 'End date/time must be after start date/time.',
+            ]);
+        }
+
+        $availability = Booking::isSlotAvailable($hallId, $newStart, $newEnd, $excludeId);
+
+        if (!$availability['available']) {
+            return response()->json([
+                'available' => false,
+                'message' => $availability['message'],
+            ]);
+        }
+
+        return response()->json(['available' => true]);
     }
 }

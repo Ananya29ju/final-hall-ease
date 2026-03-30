@@ -31,67 +31,170 @@
 
             $statusBadge = function ($status) {
                 return match ($status) {
-                    'confirmed' => 'success',
+                    'confirmed', 'confirmed without media' => 'success',
                     'completed' => 'secondary',
-                    'cancelled' => 'danger',
+                    'cancelled', 'rejected' => 'danger',
+                    'waiting for media' => 'info',
                     default => 'warning',
                 };
             };
 
             foreach ($bookings as $booking) {
-                $resources = collect($booking->resources ?? [])
-                    ->map(fn ($value) => $resourceLabels[$value] ?? ucfirst(str_replace('_', ' ', $value)))
-                    ->values()
-                    ->all();
-                if (!empty($booking->resources_other)) {
-                    $resources[] = 'Other: ' . $booking->resources_other;
-                }
-                $resourcesText = count($resources) ? implode(', ', $resources) : '-';
+                $overallBadge = $statusBadge($booking->booking_status);
+                $adminBadge = $booking->admin_status === 'approved' ? 'success' : ($booking->admin_status === 'rejected' ? 'danger' : 'warning');
+                $mediaBadge = $booking->media_status === 'accepted' ? 'success' : ($booking->media_status === 'rejected' ? 'danger' : 'warning');
 
                 echo '<tr>';
                 echo '<td>' . e($booking->id) . '</td>';
                 echo '<td>' . e(optional($booking->hall)->name ?? 'N/A') . '</td>';
                 echo '<td>' . e(optional($booking->customer)->name ?? optional($booking->user)->name ?? 'N/A') . '</td>';
-                echo '<td>' . e(optional($booking->event_date)->format('M d, Y')) . '</td>';
-                echo '<td>' . e(\Carbon\Carbon::parse($booking->start_time)->format('H:i')) . ' - ' . e(\Carbon\Carbon::parse($booking->end_time)->format('H:i')) . '</td>';
-                echo '<td><span class="badge bg-label-' . e($statusBadge($booking->booking_status ?? 'pending')) . '">' . e(ucfirst($booking->booking_status ?? 'pending')) . '</span></td>';
-                echo '<td>' . e($resourcesText) . '</td>';
-                if ($isCancelled) {
-                    echo '<td>' . e($booking->cancellation_reason ?? '-') . '</td>';
-                }
+                echo '<td>' . e($booking->formatted_datetime_range) . '</td>';
                 echo '<td>';
-                if (($booking->booking_status ?? 'pending') === 'pending') {
-                    echo '<form action="' . e(route('admin.bookings.updateStatus', $booking->id)) . '" method="POST" class="d-inline me-1">';
-                    echo csrf_field();
-                    echo method_field('PATCH');
-                    echo '<input type="hidden" name="booking_status" value="confirmed">';
-                    echo '<button class="btn btn-sm btn-success" title="Approve booking"><i class="bx bx-check"></i></button>';
+                echo '<div class="d-flex flex-column gap-1">';
+                echo '<span class="badge bg-' . $overallBadge . '">Overall: ' . e(ucfirst(str_replace('_', ' ', $booking->booking_status))) . '</span>';
+                echo '<div class="d-flex gap-1">';
+                echo '<small class="badge bg-label-' . $adminBadge . '" style="font-size: 0.65rem;">Admin: ' . e(ucfirst(str_replace('_', ' ', $booking->admin_status))) . '</small>';
+                if ($booking->media_status !== 'not_required') {
+                    echo '<small class="badge bg-label-' . $mediaBadge . '" style="font-size: 0.65rem;">Media: ' . e(ucfirst(str_replace('_', ' ', $booking->media_status))) . '</small>';
+                }
+                echo '</div>';
+                echo '</div>';
+                echo '</td>';
+
+                echo '<td>';
+                echo '<div class="d-flex flex-wrap gap-1">';
+                // Approval Buttons
+                if ($booking->admin_status === 'pending' || $booking->admin_status === 'kept_pending') {
+                    echo '<form action="' . e(route('admin.bookings.updateStatus', $booking->id)) . '" method="POST" class="d-inline">';
+                    echo csrf_field(); echo method_field('PATCH');
+                    echo '<input type="hidden" name="admin_status" value="approved">';
+                    echo '<button class="btn btn-sm btn-success" title="Approve"><i class="bx bx-check"></i></button>';
                     echo '</form>';
 
-                    echo '<form action="' . e(route('admin.bookings.updateStatus', $booking->id)) . '" method="POST" class="d-inline me-1">';
-                    echo csrf_field();
-                    echo method_field('PATCH');
-                    echo '<input type="hidden" name="booking_status" value="cancelled">';
-                    echo '<input type="hidden" name="cancellation_reason" value="Rejected by admin">';
-                    echo '<button class="btn btn-sm btn-danger" title="Reject booking" onclick="return confirm(\'Reject this booking?\')"><i class="bx bx-x"></i></button>';
+                    echo '<form action="' . e(route('admin.bookings.updateStatus', $booking->id)) . '" method="POST" class="d-inline">';
+                    echo csrf_field(); echo method_field('PATCH');
+                    echo '<input type="hidden" name="admin_status" value="rejected">';
+                    echo '<button class="btn btn-sm btn-danger" title="Reject" onclick="return confirm(\'Reject this booking?\')"><i class="bx bx-x"></i></button>';
                     echo '</form>';
+
+                    if ($booking->admin_status === 'pending') {
+                        echo '<form action="' . e(route('admin.bookings.updateStatus', $booking->id)) . '" method="POST" class="d-inline">';
+                        echo csrf_field(); echo method_field('PATCH');
+                        echo '<input type="hidden" name="admin_status" value="kept_pending">';
+                        echo '<button class="btn btn-sm btn-info" title="Keep Pending"><i class="bx bx-time"></i></button>';
+                        echo '</form>';
+                    }
                 }
-                echo '<a href="' . e(route('admin.bookings.show', $booking->id)) . '" class="btn btn-sm btn-info me-1"><i class="bx bx-show"></i></a>';
-                echo '<a href="' . e(route('admin.bookings.edit', $booking->id)) . '" class="btn btn-sm btn-warning me-1"><i class="bx bx-edit"></i></a>';
+                
+                echo '<a href="' . e(route('admin.bookings.show', $booking->id)) . '" class="btn btn-sm btn-outline-info" title="View"><i class="bx bx-show"></i></a>';
                 echo '<form action="' . e(route('admin.bookings.destroy', $booking->id)) . '" method="POST" class="d-inline">';
-                echo csrf_field();
-                echo method_field('DELETE');
-                echo '<button class="btn btn-sm btn-danger" onclick="return confirm(\'Delete this booking?\')"><i class="bx bx-trash"></i></button>';
+                echo csrf_field(); echo method_field('DELETE');
+                echo '<button class="btn btn-sm btn-outline-danger" onclick="return confirm(\'Delete this booking?\')"><i class="bx bx-trash"></i></button>';
                 echo '</form>';
+                echo '</div>';
                 echo '</td>';
                 echo '</tr>';
             }
         };
     @endphp
 
+    <div class="card mb-4 border-primary">
+        <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+            <h6 class="mb-0 text-white">Pending Action Bookings</h6>
+            <span class="badge bg-white text-primary">{{ $pendingActionBookings->count() }}</span>
+        </div>
+        <div class="card-body pt-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Hall</th>
+                            <th>Staff</th>
+                            <th>Date / Time</th>
+                            <th>Status Details</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($pendingActionBookings->isEmpty())
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No bookings pending your action.</td>
+                            </tr>
+                        @else
+                            {!! $renderRows($pendingActionBookings) !!}
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @if(isset($waitlistedBookings) && $waitlistedBookings->isNotEmpty())
+    <div class="card mb-4 border-info">
+        <div class="card-header d-flex justify-content-between align-items-center bg-info text-white">
+            <h6 class="mb-0 text-white"><i class="bx bx-time-five me-1"></i> Waitlisted Bookings (All Users)</h6>
+            <span class="badge bg-white text-info">{{ $waitlistedBookings->count() }}</span>
+        </div>
+        <div class="card-body pt-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Hall</th>
+                            <th>Staff (User)</th>
+                            <th>Event</th>
+                            <th>Date / Time</th>
+                            <th>Status</th>
+                            <th>Waitlist Expires</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($waitlistedBookings as $waitlist)
+                            <tr>
+                                <td>{{ optional($waitlist->hall)->name ?? 'N/A' }}</td>
+                                <td>{{ optional($waitlist->user)->name ?? 'N/A' }}</td>
+                                <td>{{ $waitlist->event_name }}</td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold">{{ $waitlist->formatted_datetime_range }}</span>
+
+                                    </div>
+                                </td>
+                                <td>
+                                    @if($waitlist->status === 'notified')
+                                        <span class="badge bg-label-success">Slot Offered</span>
+                                    @elseif($waitlist->status === 'expired')
+                                        <span class="badge bg-danger">Expired</span>
+                                    @elseif($waitlist->status === 'confirmed')
+                                        <span class="badge bg-label-primary">Confirmed</span>
+                                    @elseif($waitlist->status === 'cancelled')
+                                        <span class="badge bg-label-danger">Cancelled</span>
+                                    @else
+                                        <span class="badge bg-label-warning">Pending in Queue</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($waitlist->status === 'notified' && $waitlist->expires_at)
+                                        <small class="{{ $waitlist->expires_at->isPast() ? 'text-danger' : 'text-primary' }}">
+                                            {{ $waitlist->expires_at->format('M d, H:i') }}
+                                        </small>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0">Upcoming Bookings</h6>
+            <h6 class="mb-0">Upcoming Approved Bookings</h6>
             <span class="badge bg-success">{{ $upcomingBookings->count() }}</span>
         </div>
         <div class="card-body">
@@ -102,17 +205,15 @@
                             <th>#</th>
                             <th>Hall</th>
                             <th>Staff</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                            <th>Resources</th>
+                            <th>Date / Time</th>
+                            <th>Status Details</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if($upcomingBookings->isEmpty())
                             <tr>
-                                <td colspan="8" class="text-center text-muted">No upcoming bookings.</td>
+                                <td colspan="7" class="text-center text-muted text-center text-muted">No upcoming bookings.</td>
                             </tr>
                         @else
                             {!! $renderRows($upcomingBookings) !!}
@@ -136,8 +237,7 @@
                             <th>#</th>
                             <th>Hall</th>
                             <th>Staff</th>
-                            <th>Date</th>
-                            <th>Time</th>
+                            <th>Date / Time</th>
                             <th>Status</th>
                             <th>Resources</th>
                             <th>Actions</th>
@@ -170,8 +270,7 @@
                             <th>#</th>
                             <th>Hall</th>
                             <th>Staff</th>
-                            <th>Date</th>
-                            <th>Time</th>
+                            <th>Date / Time</th>
                             <th>Status</th>
                             <th>Resources</th>
                             <th>Cancellation Reason</th>
@@ -192,4 +291,11 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Simple auto-refresh every 30 seconds to simulate "real-time" sync with Media updates
+    setTimeout(function() {
+        location.reload();
+    }, 30000);
+</script>
 @endsection

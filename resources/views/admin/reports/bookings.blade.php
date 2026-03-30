@@ -17,7 +17,7 @@
                                 <th>ID</th>
                                 <th>Hall</th>
                                 <th>Staff</th>
-                                <th>Event Date</th>
+                                <th>Booking Period</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -26,7 +26,7 @@
                                     <td>#{{ $booking->id }}</td>
                                     <td>{{ $booking->hall->name }}</td>
                                     <td>{{ optional($booking->customer)->name ?? optional($booking->user)->name ?? 'N/A' }}</td>
-                                    <td>{{ $booking->event_date->format('M d, Y') }}</td>
+                                    <td>{{ $booking->formatted_datetime_range }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

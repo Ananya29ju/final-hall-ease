@@ -93,6 +93,7 @@ Route::middleware(['auth', 'admin'])
         Route::post('bookings/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel.submit');
         Route::resource('bookings', BookingController::class);
         Route::patch('bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.updateStatus');
+        Route::get('bookings/check-availability', [BookingController::class, 'checkAvailability'])->name('bookings.check-availability');
 
         // Customer Management Routes
         Route::resource('customers', CustomerController::class, ['only' => ['index', 'show', 'destroy']]);
@@ -136,7 +137,12 @@ Route::middleware(['auth', 'staff'])
         Route::post('bookings', [UserBookingController::class, 'store'])->name('bookings.store');
         Route::get('bookings/cancel', [UserBookingController::class, 'showCancellationForm'])->name('bookings.cancel.form');
         Route::post('bookings/cancel', [UserBookingController::class, 'cancel'])->name('bookings.cancel.submit');
+        Route::get('bookings/check-availability', [UserBookingController::class, 'checkAvailability'])->name('bookings.check-availability');
         Route::get('notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
+        
+        // Waitlist Management
+        Route::post('waitlist/join', [UserBookingController::class, 'joinWaitlist'])->name('waitlist.join');
+        Route::get('waitlist/{waitlist}/confirm', [UserBookingController::class, 'confirmWaitlist'])->name('waitlist.confirm');
     });
 
 // ============================================
@@ -147,6 +153,8 @@ Route::middleware(['auth', 'media'])
     ->name('media.')
     ->group(function () {
         Route::get('dashboard', [MediaDashboardController::class, 'index'])->name('dashboard');
+        Route::get('bookings', [App\Http\Controllers\Media\BookingController::class, 'index'])->name('bookings.index');
+        Route::patch('bookings/{booking}/status', [App\Http\Controllers\Media\BookingController::class, 'updateStatus'])->name('bookings.updateStatus');
         Route::get('notifications', [MediaNotificationController::class, 'index'])->name('notifications.index');
     });
 
