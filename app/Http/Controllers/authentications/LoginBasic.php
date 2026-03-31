@@ -35,7 +35,18 @@ class LoginBasic extends Controller
     {
         // Validate input
         $validated = $request->validate([
-            'email' => 'required|email',
+            'email' => [
+                'required',
+                'email',
+                function ($attribute, $value, $fail) {
+                    $lowerValue = strtolower($value);
+                    if ($lowerValue === 'admin@example.com') return; // Allow legacy admin
+                    
+                    if (!str_ends_with($lowerValue, '@staloysius.edu.in')) {
+                        $fail('pls use institution email id to login or create account or register');
+                    }
+                },
+            ],
             'password' => 'required|string|min:6',
         ], [
             'email.required' => 'Email is required',

@@ -136,7 +136,7 @@ class BookingController extends Controller
             'media_requirements.*' => 'in:photography,videography,livestreaming,reels,photos,others',
             'media_requirements_other' => 'nullable|string|max:500',
             'resources' => 'nullable|array',
-            'resources.*' => 'in:projectors,sound_systems,lighting,seating,other',
+            'resources.*' => 'in:projector,mic,tables,chairs,saplings,water_bottles,other',
             'resources_other' => 'nullable|string|max:500',
             'details_confirmation' => 'accepted',
         ]);

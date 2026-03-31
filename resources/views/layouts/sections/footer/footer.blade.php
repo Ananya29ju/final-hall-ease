@@ -10,31 +10,17 @@ $containerFooter = !empty($containerNav) ? $containerNav : 'container-fluid';
                 St Aloysius (Deemed to be University) Mangaluru
             </div>
             <div class="footer-social">
-                <a href="#" class="social-twitter" title="Twitter"><i class="bx bxl-twitter"></i></a>
-                <a href="#" class="social-instagram" title="Instagram"><i class="bx bxl-instagram"></i></a>
-                <a href="#" class="social-bolt" title="Updates"><i class="bx bx-bolt"></i></a>
-                <a href="#" class="social-google" title="Google"><i class="bx bxl-google"></i></a>
-                <a href="#" class="social-youtube" title="YouTube"><i class="bx bxl-youtube"></i></a>
-                <a href="#" class="social-globe" title="Website"><i class="bx bx-globe"></i></a>
+                <a href="https://x.com/SACMangaluru/" target="_blank" class="social-twitter" title="Twitter"><i class="bx bxl-twitter"></i></a>
+                <a href="https://www.facebook.com/staloysiuscollegemangaluru/" target="_blank" class="social-facebook" title="Facebook"><i class="bx bxl-facebook"></i></a>
+                <a href="https://www.instagram.com/staloysiusmangaluru/" target="_blank" class="social-instagram" title="Instagram"><i class="bx bxl-instagram"></i></a>
+                <a href="https://www.youtube.com/channel/UCWSjvIZ7Z7qO0gne_e2rpcA" target="_blank" class="social-youtube" title="YouTube"><i class="bx bxl-youtube"></i></a>
+                <a href="https://in.linkedin.com/school/st-aloysius-deemedtobe-university/" target="_blank" class="social-linkedin" title="LinkedIn"><i class="bx bxl-linkedin"></i></a>
+                <a href="https://staloysius.edu.in/" target="_blank" class="social-globe" title="Website"><i class="bx bx-globe"></i></a>
             </div>
             <div class="footer-love">
                 Developed with <span>&hearts;</span> by Hall-Ease Team
             </div>
-            <div class="footer-links">
-                <a href="#">Terms & Conditions</a>
-                <span class="separator">|</span>
-                <a href="#">Contact Us</a>
-                <span class="separator">|</span>
-                <a href="#">Privacy Policy</a>
-                <span class="separator">|</span>
-                <a href="#">Product Pricing</a>
-                <span class="separator">|</span>
-                <a href="#">Refund Policy</a>
-                <span class="separator">|</span>
-                <a href="#">Cancellation</a>
-                <span class="separator">|</span>
-                <a href="#">Shipping & Delivery</a>
-            </div>
+
         </div>
     </div>
 </footer>

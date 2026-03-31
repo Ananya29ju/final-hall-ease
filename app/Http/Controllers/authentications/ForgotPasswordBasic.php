@@ -37,7 +37,15 @@ class ForgotPasswordBasic extends Controller
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate([
-            'email' => ['required', 'email'],
+            'email' => [
+                'required',
+                'email',
+                function ($attribute, $value, $fail) {
+                    if (strtolower($value) !== 'admin@example.com' && !str_ends_with(strtolower($value), '@staloysius.edu.in')) {
+                        $fail('pls use institution email id to login or create account or register');
+                    }
+                },
+            ],
         ]);
 
         $status = Password::sendResetLink(

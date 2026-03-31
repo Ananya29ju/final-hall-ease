@@ -24,13 +24,10 @@ $userInitial = strtoupper(substr(Auth::user()->name ?? 'U', 0, 1));
 @endif
 
 <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-    <ul class="navbar-nav flex-row align-items-center w-100">
-        <!-- Search Icon -->
-        <li class="nav-item me-2">
-            <a class="nav-link" href="javascript:void(0);">
-                <i class="bx bx-search icon-md navbar-search-icon"></i>
-            </a>
-        </li>
+    <ul class="navbar-nav flex-row align-items-center w-100 gap-2">
+
+
+
         <!-- Expand Icon -->
         <li class="nav-item me-2">
             <a class="nav-link" href="javascript:void(0);" onclick="toggleFullScreen()">
@@ -46,7 +43,17 @@ $userInitial = strtoupper(substr(Auth::user()->name ?? 'U', 0, 1));
                 <ul class="dropdown-menu">
                     @forelse ($blocks as $blockName => $halls)
                         <li>
-                            <a class="dropdown-item" href="{{ route('user.halls.block', ['campus' => $campusName, 'block' => $blockName]) }}">
+                            @php
+                                $role = Auth::user()->role;
+                                if ($role === 'admin') {
+                                    $blockRoute = route('admin.halls.block', ['campus' => $campusName, 'block' => $blockName]);
+                                } elseif ($role === 'media') {
+                                    $blockRoute = route('media.halls.block', ['campus' => $campusName, 'block' => $blockName]);
+                                } else {
+                                    $blockRoute = route('user.halls.block', ['campus' => $campusName, 'block' => $blockName]);
+                                }
+                            @endphp
+                            <a class="dropdown-item" href="{{ $blockRoute }}">
                                 {{ $blockName }}
                             </a>
                         </li>
@@ -91,18 +98,19 @@ $userInitial = strtoupper(substr(Auth::user()->name ?? 'U', 0, 1));
                     <div class="dropdown-divider my-1"></div>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="javascript:void(0);">
+                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
                         <i class="icon-base bx bx-user icon-md me-3"></i><span>My Profile</span>
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="javascript:void(0);">
+                    <a class="dropdown-item" href="{{ route('profile.settings') }}">
                         <i class="icon-base bx bx-cog icon-md me-3"></i><span>Settings</span>
                     </a>
                 </li>
                 <li>
                     <div class="dropdown-divider my-1"></div>
                 </li>
+
                 <li>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -126,3 +134,5 @@ function toggleFullScreen() {
     }
 }
 </script>
+
+

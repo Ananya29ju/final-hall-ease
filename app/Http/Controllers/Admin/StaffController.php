@@ -55,7 +55,16 @@ class StaffController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                'unique:users,email',
+                function ($attribute, $value, $fail) {
+                    if (!str_ends_with(strtolower($value), '@staloysius.edu.in')) {
+                        $fail('Only institutional email addresses ending with @staloysius.edu.in are allowed.');
+                    }
+                },
+            ],
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:6|confirmed',
         ]);
@@ -82,7 +91,16 @@ class StaffController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                'unique:users,email',
+                function ($attribute, $value, $fail) {
+                    if (!str_ends_with(strtolower($value), '@staloysius.edu.in')) {
+                        $fail('Only institutional email addresses ending with @staloysius.edu.in are allowed.');
+                    }
+                },
+            ],
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|in:user,media',
@@ -126,7 +144,16 @@ class StaffController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $staff->id,
+            'email' => [
+                'required',
+                'email',
+                'unique:users,email,' . $staff->id,
+                function ($attribute, $value, $fail) {
+                    if (!str_ends_with(strtolower($value), '@staloysius.edu.in')) {
+                        $fail('Only institutional email addresses ending with @staloysius.edu.in are allowed.');
+                    }
+                },
+            ],
             'phone' => 'nullable|string|max:20',
             'role' => 'required|in:admin,user,media',
         ]);

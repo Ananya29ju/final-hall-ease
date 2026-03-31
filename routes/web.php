@@ -15,6 +15,7 @@ use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\User\HallController as UserHallController;
 use App\Http\Controllers\User\BookingController as UserBookingController;
 use App\Http\Controllers\User\NotificationController as UserNotificationController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\layouts\WithoutMenu;
 use App\Http\Controllers\layouts\WithoutNavbar;
@@ -66,11 +67,26 @@ Route::get('register', [RegisterBasic::class, 'index'])->name('register');
 Route::post('login', [LoginBasic::class, 'store'])->name('login-store');
 Route::post('logout', [LoginBasic::class, 'logout'])->name('logout');
 Route::post('register', [RegisterBasic::class, 'store'])->name('register-store');
+
+// OTP email verification (registration)
+Route::get('register/verify', [RegisterBasic::class, 'showVerify'])->name('register.verify');
+Route::post('register/verify', [RegisterBasic::class, 'verifyOtp'])->name('register.verify.submit');
+Route::post('register/verify/resend', [RegisterBasic::class, 'resendOtp'])->name('register.verify.resend');
 Route::middleware('guest')->group(function () {
     Route::get('forgot-password', [ForgotPasswordBasic::class, 'index'])->name('password.request');
     Route::post('forgot-password', [ForgotPasswordBasic::class, 'sendResetLinkEmail'])->name('password.email');
     Route::get('reset-password/{token}', [ForgotPasswordBasic::class, 'showResetForm'])->name('password.reset');
     Route::post('reset-password', [ForgotPasswordBasic::class, 'reset'])->name('password.update');
+});
+
+// ============================================
+// PROFILE ROUTES (For authenticated users)
+// ============================================
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/settings', [ProfileController::class, 'settings'])->name('profile.settings');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
 // ============================================
@@ -85,6 +101,8 @@ Route::middleware(['auth', 'admin'])
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Hall Management Routes
+        Route::get('halls/browse', [HallController::class, 'browse'])->name('halls.browse');
+        Route::get('halls/campus/{campus}/block/{block}', [HallController::class, 'block'])->name('halls.block');
         Route::delete('halls/{hall}/images/{image}', [HallController::class, 'destroyImage'])->name('halls.images.destroy');
         Route::resource('halls', HallController::class);
 
@@ -106,9 +124,6 @@ Route::middleware(['auth', 'admin'])
         Route::post('staff/store-user', [StaffController::class, 'storeUser'])->name('staff.store-user');
         Route::resource('staff', StaffController::class);
 
-        // User Verification
-        Route::get('verifications', [\App\Http\Controllers\Admin\UserVerificationController::class, 'index'])->name('verifications.index');
-        Route::patch('verifications/{user}', [\App\Http\Controllers\Admin\UserVerificationController::class, 'update'])->name('verifications.update');
 
         // Reports Routes
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
@@ -155,6 +170,11 @@ Route::middleware(['auth', 'media'])
     ->name('media.')
     ->group(function () {
         Route::get('dashboard', [MediaDashboardController::class, 'index'])->name('dashboard');
+        
+        // Hall routes for Media (read-only)
+        Route::get('halls/browse', [\App\Http\Controllers\Media\HallController::class, 'browse'])->name('halls.browse');
+        Route::get('campus/{campus}/block/{block}', [\App\Http\Controllers\Media\HallController::class, 'block'])->name('halls.block');
+
         Route::get('bookings', [App\Http\Controllers\Media\BookingController::class, 'index'])->name('bookings.index');
         Route::patch('bookings/{booking}/status', [App\Http\Controllers\Media\BookingController::class, 'updateStatus'])->name('bookings.updateStatus');
         Route::get('notifications', [MediaNotificationController::class, 'index'])->name('notifications.index');

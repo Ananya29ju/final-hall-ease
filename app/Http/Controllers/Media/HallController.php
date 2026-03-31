@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Media;
 
 use App\Http\Controllers\Controller;
 use App\Models\Hall;
@@ -10,7 +10,7 @@ class HallController extends Controller
     /**
      * Display campus/block navigation for users.
      */
-    public function index(\Illuminate\Http\Request $request)
+    public function browse(\Illuminate\Http\Request $request)
     {
         if ($request->filled('search')) {
             $halls = Hall::query()
@@ -22,7 +22,7 @@ class HallController extends Controller
                 ->paginate(12)
                 ->withQueryString();
 
-            return view('user.block-halls', [
+            return view('media.halls.block-halls', [
                 'campus' => 'Search Results',
                 'block' => "for '" . $request->search . "'",
                 'halls' => $halls,
@@ -43,7 +43,7 @@ class HallController extends Controller
                 return $rows->pluck('location')->unique()->values();
             });
 
-        return view('user.halls.index', [
+        return view('media.halls.browse', [
             'campusGroups' => $campusGroups,
         ]);
     }
@@ -61,7 +61,7 @@ class HallController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        return view('user.block-halls', [
+        return view('media.halls.block-halls', [
             'campus' => $campus,
             'block' => $block,
             'halls' => $halls,

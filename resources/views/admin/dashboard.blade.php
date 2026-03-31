@@ -323,6 +323,16 @@
                             </div>
                             <i class="bx bx-chevron-right text-muted"></i>
                         </a>
+                        <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#contactMediaModal" class="list-group-item list-group-item-action px-4 py-3 d-flex align-items-center justify-content-between border-0">
+                            <div class="d-flex align-items-center">
+                                <span style="background: white; padding: 8px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 12px;"><i class="bx bx-camera-movie text-info" style="font-size: 1.3rem;"></i></span>
+                                <div>
+                                    <div class="fw-bold">Contact Media</div>
+                                    <small class="text-muted">Reach out to Media Dept.</small>
+                                </div>
+                            </div>
+                            <i class="bx bx-chevron-right text-muted"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -605,4 +615,46 @@
         renderCalendar(visibleYear, visibleMonth);
     });
 </script>
+
+<!-- Contact Media Modal -->
+<div class="modal fade" id="contactMediaModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-info fw-bold"><i class="bx bx-camera-movie me-2"></i>Contact Media</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="text-center p-4 bg-label-info">
+            <h6 class="mb-1 fw-bold text-dark">St Aloysius (Deemed to be University)</h6>
+            <span class="badge bg-info">SOCIAL MEDIA CELL AND INNOVATION CELL</span>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                <div style="max-width: 65%;">
+                    <h6 class="mb-1 text-dark">Mr Manoj Fernandes</h6>
+                    <small class="text-muted d-block" style="white-space: normal;">Chair of Social Media Strategy and Innovation Cell</small>
+                </div>
+                <a href="tel:9986684458" class="btn btn-sm btn-success"><i class="bx bx-phone me-1"></i>9986684458</a>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                <div style="max-width: 65%;">
+                    <h6 class="mb-1 text-dark">Mr Jayantha Shetty S</h6>
+                    <small class="text-muted d-block" style="white-space: normal;">Media Coordinator</small>
+                </div>
+                <a href="tel:8747068541" class="btn btn-sm btn-success"><i class="bx bx-phone me-1"></i>8747068541</a>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                <div style="max-width: 65%;">
+                    <h6 class="mb-1 text-dark">Mr Prajith Kumar</h6>
+                    <small class="text-muted d-block" style="white-space: normal;">Media Technician</small>
+                </div>
+                <a href="tel:9746863770" class="btn btn-sm btn-success"><i class="bx bx-phone me-1"></i>9746863770</a>
+            </li>
+            
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection

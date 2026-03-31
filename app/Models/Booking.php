@@ -35,6 +35,7 @@ class Booking extends Model
         'cancellation_reason',
         'media_feedback_reason',
         'unavailable_media_requirements',
+        'accepted_media_requirements',
         'media_remarks',
     ];
 
@@ -45,6 +46,7 @@ class Booking extends Model
         'media_requirements' => 'array',
         'resources' => 'array',
         'unavailable_media_requirements' => 'array',
+        'accepted_media_requirements' => 'array',
     ];
 
 

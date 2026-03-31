@@ -13,9 +13,7 @@ $isFlex = $isFlex ?? false;
 $isFooter = $isFooter ?? true;
 $customizerHidden = $customizerHidden ?? '';
 
-if (request()->is('admin/*')) {
-    $isNavbar = false;
-}
+
 
 /* HTML Classes */
 $navbarDetached = 'navbar-detached';

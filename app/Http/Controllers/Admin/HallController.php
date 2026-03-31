@@ -13,10 +13,63 @@ class HallController extends Controller
     /**
      * Display a listing of halls
      */
-    public function index()
+    public function index(Request $request)
     {
-        $halls = Hall::paginate(10);
+        $query = Hall::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('campus_name', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+        }
+
+        $halls = $query->paginate(10)->withQueryString();
         return view('admin.halls.index', compact('halls'));
+    }
+
+    /**
+     * Display campus/block navigation for admin.
+     */
+    public function browse()
+    {
+        $campusGroups = Hall::query()
+            ->select('campus_name', 'location')
+            ->whereNotNull('campus_name')
+            ->where('campus_name', '!=', '')
+            ->whereNotNull('location')
+            ->where('location', '!=', '')
+            ->orderBy('campus_name')
+            ->orderBy('location')
+            ->get()
+            ->groupBy('campus_name')
+            ->map(function ($rows) {
+                return $rows->pluck('location')->unique()->values();
+            });
+
+        return view('admin.halls.browse', [
+            'campusGroups' => $campusGroups,
+        ]);
+    }
+
+    /**
+     * Display halls for a specific campus block.
+     */
+    public function block(string $campus, string $block)
+    {
+        $halls = Hall::query()
+            ->with('images')
+            ->where('campus_name', $campus)
+            ->where('location', $block)
+            ->orderBy('name')
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('admin.halls.block-halls', [
+            'campus' => $campus,
+            'block' => $block,
+            'halls' => $halls,
+        ]);
     }
 
     /**

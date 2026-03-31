@@ -28,7 +28,23 @@ class NewBookingRequest extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        $data = $this->toArray($notifiable);
+        $message = $data['message'];
+
+        return (new MailMessage)
+            ->subject('New Booking Request - ' . $this->booking->event_name)
+            ->greeting('Hello Admin,')
+            ->line($message)
+            ->action('Review Request', route('login'))
+            ->line('Thank you!');
     }
 
     /**

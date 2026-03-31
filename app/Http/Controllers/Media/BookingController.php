@@ -15,14 +15,24 @@ class BookingController extends Controller
      * Display bookings that require media action.
      * Only shows bookings that are Admin-approved and have media requirements.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $bookings = Booking::with(['hall', 'customer', 'user'])
+        $query = Booking::with(['hall', 'customer', 'user'])
             ->where('admin_status', 'approved')
             ->whereNotNull('media_requirements')
             ->where('media_requirements', '!=', '[]')
-            ->where('booking_status', '!=', 'cancelled')
-            ->latest()
+            ->where('booking_status', '!=', 'cancelled');
+            
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('hall', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })->orWhereHas('user', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            })->orWhere('id', 'like', "%{$search}%");
+        }
+
+        $bookings = $query->latest()
             ->get();
 
         return view('media.bookings.index', compact('bookings'));
@@ -37,6 +47,7 @@ class BookingController extends Controller
             'media_status' => 'required|in:accepted,rejected,kept_pending',
             'media_feedback_reason' => 'required_if:media_status,rejected,kept_pending|string|nullable',
             'unavailable_media_requirements' => 'required_if:media_status,rejected|array|nullable',
+            'accepted_media_requirements' => 'nullable|array',
             'media_remarks' => 'nullable|string',
         ]);
 
@@ -56,6 +67,7 @@ class BookingController extends Controller
             'booking_status' => $bookingStatus,
             'media_feedback_reason' => $request->media_feedback_reason,
             'unavailable_media_requirements' => $request->unavailable_media_requirements,
+            'accepted_media_requirements' => $request->accepted_media_requirements,
             'media_remarks' => $request->media_remarks,
         ]);
 
@@ -72,6 +84,6 @@ class BookingController extends Controller
             $admin->notify(new BookingStatusUpdated($booking, 'media_confirmed', $mediaStatus));
         }
 
-        return back()->with('success', 'Media action "' . ucfirst(str_replace('_', ' ', $mediaStatus)) . '" completed successfully. Final booking status: ' . strtoupper(str_replace('_', ' ', $bookingStatus)));
+        return back()->with('success', 'Media action "' . ucfirst(str_replace('_', ' ', $mediaStatus)) . '" completed successfully.');
     }
 }

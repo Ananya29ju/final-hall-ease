@@ -58,6 +58,10 @@
                         echo '<br><i class="text-muted">' . e($booking->media_remarks) . '</i>';
                     }
                     echo '</div>';
+                } elseif ($booking->media_status === 'accepted' && !empty($booking->accepted_media_requirements)) {
+                    echo '<div class="mt-1 p-2 border border-success rounded bg-light text-success" style="font-size: 0.75rem; line-height: 1.2;">';
+                    echo '<strong>Media Accepted:</strong> ' . e(implode(', ', array_map('ucfirst', $booking->accepted_media_requirements)));
+                    echo '</div>';
                 }
                 echo '</div>';
                 echo '</td>';

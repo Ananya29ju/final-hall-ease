@@ -15,31 +15,48 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Admin Accounts
+        User::updateOrCreate(
+            ['email' => 'admin1@staloysius.edu.in'],
+            ['name' => 'Admin One', 'password' => bcrypt('password123'), 'role' => 'admin', 'status' => 'approved']
+        );
+        User::updateOrCreate(
+            ['email' => 'admin2@staloysius.edu.in'],
+            ['name' => 'Admin Two', 'password' => bcrypt('password123'), 'role' => 'admin', 'status' => 'approved']
+        );
+
+        // Staff Accounts
+        User::updateOrCreate(
+            ['email' => 'staff1@staloysius.edu.in'],
+            ['name' => 'Staff One', 'password' => bcrypt('password123'), 'role' => 'user', 'status' => 'approved']
+        );
+        User::updateOrCreate(
+            ['email' => 'staff2@staloysius.edu.in'],
+            ['name' => 'Staff Two', 'password' => bcrypt('password123'), 'role' => 'user', 'status' => 'approved']
+        );
+
+        // Media Accounts
+        User::updateOrCreate(
+            ['email' => 'media1@staloysius.edu.in'],
+            ['name' => 'Media One', 'password' => bcrypt('password123'), 'role' => 'media', 'status' => 'approved']
+        );
+        User::updateOrCreate(
+            ['email' => 'media2@staloysius.edu.in'],
+            ['name' => 'Media Two', 'password' => bcrypt('password123'), 'role' => 'media', 'status' => 'approved']
+        );
+
+        // Original accounts (for legacy compatibility)
         User::updateOrCreate(
             ['email' => 'admin@example.com'],
-            [
-                'name' => 'Admin User',
-                'password' => bcrypt('password'),
-                'role' => 'admin',
-            ]
+            ['name' => 'Admin User', 'password' => bcrypt('password'), 'role' => 'admin', 'status' => 'approved']
         );
-
         User::updateOrCreate(
             ['email' => 'staff@example.com'],
-            [
-                'name' => 'Staff User',
-                'password' => bcrypt('password'),
-                'role' => 'user',
-            ]
+            ['name' => 'Staff User', 'password' => bcrypt('password'), 'role' => 'user', 'status' => 'approved']
         );
-
         User::updateOrCreate(
             ['email' => 'media@example.com'],
-            [
-                'name' => 'Media User',
-                'password' => bcrypt('password'),
-                'role' => 'media',
-            ]
+            ['name' => 'Media User', 'password' => bcrypt('password'), 'role' => 'media', 'status' => 'approved']
         );
 
         Hall::updateOrCreate(

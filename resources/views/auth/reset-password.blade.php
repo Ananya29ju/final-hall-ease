@@ -39,7 +39,7 @@
 
                         <div class="mb-6">
                             <label for="email" class="form-label">Email</label>
-                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $email) }}" required autofocus>
+                            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $email) }}" required autofocus autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
                             @error('email')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -48,7 +48,7 @@
                         <div class="mb-6 form-password-toggle">
                             <label for="password" class="form-label">New Password</label>
                             <div class="input-group input-group-merge">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required>
+                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');">
                                 <span class="input-group-text cursor-pointer"><i class="icon-base bx bx-hide"></i></span>
                             </div>
                             @error('password')
@@ -59,7 +59,7 @@
                         <div class="mb-6 form-password-toggle">
                             <label for="password_confirmation" class="form-label">Confirm Password</label>
                             <div class="input-group input-group-merge">
-                                <input id="password_confirmation" type="password" class="form-control" name="password_confirmation" required>
+                                <input id="password_confirmation" type="password" class="form-control" name="password_confirmation" required autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');">
                                 <span class="input-group-text cursor-pointer"><i class="icon-base bx bx-hide"></i></span>
                             </div>
                         </div>

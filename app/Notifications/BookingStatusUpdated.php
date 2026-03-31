@@ -32,7 +32,23 @@ class BookingStatusUpdated extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        $data = $this->toArray($notifiable);
+        $message = $data['message'];
+
+        return (new MailMessage)
+            ->subject('Booking Status Update - ' . $this->booking->event_name)
+            ->greeting('Hello ' . $notifiable->name . ',')
+            ->line($message)
+            ->action('View Booking Details', route('login'))
+            ->line('Thank you for using HallEase!');
     }
 
     /**

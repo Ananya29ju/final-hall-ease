@@ -43,11 +43,13 @@
                             <td>
                                 @php
                                     $resourceLabels = [
-                                        'projectors' => 'Projectors',
-                                        'sound_systems' => 'Sound Systems',
-                                        'lighting' => 'Lighting',
-                                        'seating' => 'Seating',
-                                        'other' => 'Other',
+                                        'projector' => 'Projector',
+                                        'mics' => 'Mics',
+                                        'chairs' => 'Chairs',
+                                        'tables' => 'Tables',
+                                        'sapling' => 'Sapling',
+                                        'glass_and_water' => 'Glass and Water',
+                                        'other' => 'others',
                                     ];
 
                                     $resources = collect($booking->resources ?? [])

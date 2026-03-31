@@ -62,13 +62,10 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.sections.menu.verticalMenu', function ($view) {
             $notificationCount = 0;
-            $pendingVerifications = 0;
             if (Auth::check()) {
                 $notificationCount = Auth::user()->unreadNotifications->count();
-                $pendingVerifications = \App\Models\User::where('role', 'media')->where('status', 'pending')->count();
             }
             $view->with('admin_notification_count', $notificationCount);
-            $view->with('pending_verification_count', $pendingVerifications);
         });
 
         View::composer('layouts.sections.menu.userVerticalMenu', function ($view) {

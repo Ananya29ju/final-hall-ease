@@ -71,11 +71,17 @@
                                     <td>
                                         <div class="d-flex flex-wrap gap-1">
                                             @if($booking->media_status !== 'accepted')
-                                                <form action="{{ route('media.bookings.updateStatus', $booking->id) }}" method="POST">
-                                                    @csrf @method('PATCH')
-                                                    <input type="hidden" name="media_status" value="accepted">
-                                                    <button class="btn btn-sm btn-success" title="Accept"><i class="bx bx-check"></i> Accept</button>
-                                                </form>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-success btn-media-feedback" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#mediaFeedbackModal"
+                                                        data-booking-id="{{ $booking->id }}"
+                                                        data-action-url="{{ route('media.bookings.updateStatus', $booking->id) }}"
+                                                        data-status="accepted"
+                                                        data-requirements="{{ json_encode($booking->media_requirements ?? []) }}"
+                                                        title="Accept">
+                                                    <i class="bx bx-check"></i> Accept
+                                                </button>
                                             @endif
 
                                             @if($booking->media_status !== 'rejected')
@@ -132,20 +138,20 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
+                    <div class="mb-3" id="reasonSection">
                         <label class="form-label" id="reasonLabel">Reason for Action (Mandatory)</label>
                         <textarea name="media_feedback_reason" class="form-control" rows="3" required placeholder="Why is this action being taken?"></textarea>
                     </div>
 
                     <div class="mb-3" id="requirementsSection">
-                        <label class="form-label">Unavailable Media Requirements (Mandatory)</label>
+                        <label class="form-label" id="requirementsSectionLabel">Unavailable Media Requirements (Mandatory)</label>
                         <div id="requirementsList" class="p-2 border rounded bg-light" style="max-height: 200px; overflow-y: auto;">
                             <!-- Populated via JS -->
                         </div>
-                        <small class="text-muted">Select which specific requirements are NOT available or causing delay.</small>
+                        <small class="text-muted" id="requirementsSectionHint">Select which specific requirements are NOT available or causing delay.</small>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-3" id="remarksSection">
                         <label class="form-label">Remarks (Optional)</label>
                         <textarea name="media_remarks" class="form-control" rows="2" placeholder="Additional comments or explanation"></textarea>
                     </div>
@@ -180,18 +186,44 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const reqSection = document.getElementById('requirementsSection');
 
+            const reasonTextarea = document.querySelector('textarea[name="media_feedback_reason"]');
+            
+            const reqLabel = document.getElementById('requirementsSectionLabel');
+            const reqHint = document.getElementById('requirementsSectionHint');
+            
+            const reasonSection = document.getElementById('reasonSection');
+            const remarksSection = document.getElementById('remarksSection');
+
             if (status === 'rejected') {
                 titleEl.textContent = 'Reject Media Request';
                 reasonLabelEl.textContent = 'Reason for Rejection (Mandatory)';
                 submitBtnEl.textContent = 'Confirm Rejection';
                 submitBtnEl.className = 'btn btn-danger';
                 reqSection.style.display = 'block';
+                reasonSection.style.display = 'block';
+                remarksSection.style.display = 'block';
+                reasonTextarea.required = true;
+                reqLabel.textContent = 'Unavailable Media Requirements (Mandatory)';
+                reqHint.textContent = 'Select which specific requirements are NOT available or causing delay.';
+            } else if (status === 'accepted') {
+                titleEl.textContent = 'Accept Media Request';
+                submitBtnEl.textContent = 'Confirm Acceptance';
+                submitBtnEl.className = 'btn btn-success';
+                reqSection.style.display = 'block';
+                reasonSection.style.display = 'none';
+                remarksSection.style.display = 'none';
+                reasonTextarea.required = false;
+                reqLabel.textContent = 'Accepted Media Requirements (Confirm items)';
+                reqHint.textContent = 'Check the items you are explicitly accepting for this booking.';
             } else {
                 titleEl.textContent = 'Keep Media Pending';
                 reasonLabelEl.textContent = 'Reason for Pending (Mandatory)';
                 submitBtnEl.textContent = 'Confirm Pending';
                 submitBtnEl.className = 'btn btn-info';
                 reqSection.style.display = 'none';
+                reasonSection.style.display = 'block';
+                remarksSection.style.display = 'block';
+                reasonTextarea.required = true;
             }
             
             const reqList = document.getElementById('requirementsList');
@@ -201,8 +233,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 requirements.forEach(req => {
                     const div = document.createElement('div');
                     div.className = 'form-check mb-1';
+                    const inputName = status === 'accepted' ? 'accepted_media_requirements[]' : 'unavailable_media_requirements[]';
                     div.innerHTML = `
-                        <input class="form-check-input" type="checkbox" name="unavailable_media_requirements[]" value="${req}" id="req_${req}">
+                        <input class="form-check-input" type="checkbox" name="${inputName}" value="${req}" id="req_${req}">
                         <label class="form-check-label" for="req_${req}">${req.charAt(0).toUpperCase() + req.slice(1)}</label>
                     `;
                     reqList.appendChild(div);

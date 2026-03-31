@@ -160,11 +160,13 @@
             <div class="col-md-12 mb-3">
                 <div class="d-flex flex-wrap gap-3">
                     @foreach([
-                        'projectors' => 'Projectors',
-                        'sound_systems' => 'Sound Systems',
-                        'lighting' => 'Lighting',
-                        'seating' => 'Seating',
-                        'other' => 'Other'
+                        'projector' => 'Projector',
+                        'mics' => 'Mics',
+                        'chairs' => 'Chairs',
+                        'tables' => 'Tables',
+                        'sapling' => 'Sapling',
+                        'glass_and_water' => 'Glass and Water',
+                        'other' => 'others'
                     ] as $value => $label)
                         <div class="form-check">
                             <input class="form-check-input"
@@ -178,7 +180,7 @@
                     @endforeach
                 </div>
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-md-12 mb-3 {{ in_array('other', $selectedResources, true) ? '' : 'd-none' }}" id="resources_other_container">
                 <label class="form-label">Other Resource (Please specify)</label>
                 <input type="text"
                        name="resources_other"
@@ -203,4 +205,25 @@
     </div>
 </div>
 
+@endsection
+
+@section('page-script')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle "Other" input visibility for Resources Required
+    const resourcesOtherCheckbox = document.getElementById('edit_resource_other');
+    const resourcesOtherContainer = document.getElementById('resources_other_container');
+
+    if (resourcesOtherCheckbox && resourcesOtherContainer) {
+        resourcesOtherCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                resourcesOtherContainer.classList.remove('d-none');
+            } else {
+                resourcesOtherContainer.classList.add('d-none');
+                resourcesOtherContainer.querySelector('input').value = '';
+            }
+        });
+    }
+});
+</script>
 @endsection

@@ -416,7 +416,7 @@
                             'photos' => 'Photos',
                             'others' => 'Others'
                         ] as $value => $label)
-                            <div class="form-check">
+                            <div class="form-check {{ $value === 'livestreaming' ? 'livestreaming-option' : '' }}" {!! $value === 'livestreaming' ? 'style="display: none;"' : '' !!}>
                                 <input class="form-check-input"
                                        type="checkbox"
                                        id="user_media_{{ $value }}"
@@ -447,11 +447,13 @@
                 <div class="col-md-12 mb-3">
                     <div class="d-flex flex-wrap gap-3">
                         @foreach([
-                            'projectors' => 'Projectors',
-                            'sound_systems' => 'Sound Systems',
-                            'lighting' => 'Lighting',
-                            'seating' => 'Seating',
-                            'other' => 'Other'
+                            'projector' => 'Projector',
+                            'mics' => 'Mics',
+                            'chairs' => 'Chairs',
+                            'tables' => 'Tables',
+                            'sapling' => 'Sapling',
+                            'glass_and_water' => 'Glass and Water',
+                            'other' => 'others'
                         ] as $value => $label)
                             <div class="form-check">
                                 <input class="form-check-input"
@@ -803,11 +805,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Hall change only triggers availability check (no duration impact)
-    hallSelect.addEventListener('change', checkAvailability);
+    hallSelect.addEventListener('change', function() {
+        checkAvailability();
+        toggleLivestreaming();
+    });
 
     // Initial calculation in case there are old values from failed validation
     calculateDuration();
     checkAvailability();
+    toggleLivestreaming();
+
+    function toggleLivestreaming() {
+        if (!hallSelect) return;
+
+        const selectedOption = hallSelect.options[hallSelect.selectedIndex];
+        const hallName = selectedOption ? selectedOption.text.trim().toLowerCase() : '';
+
+        // Halls that allow live streaming
+        const livestreamHalls = [
+            'eric mathais',
+            'sanidhya',
+            'l. f. rasuinha',
+            'robert sequeira'
+        ];
+
+        const allowLivestream = livestreamHalls.some(h => hallName.includes(h));
+        const livestreamOption = document.querySelector('.livestreaming-option');
+
+        if (livestreamOption) {
+            if (allowLivestream) {
+                livestreamOption.style.display = 'block';
+            } else {
+                livestreamOption.style.display = 'none';
+                const cb = livestreamOption.querySelector('input[type="checkbox"]');
+                if (cb) cb.checked = false;
+            }
+        }
+    }
 
     // Toggle "Others" input visibility for Media Requirements
     const mediaOthersCheckbox = document.getElementById('user_media_others');
