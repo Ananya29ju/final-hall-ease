@@ -2,6 +2,12 @@
 
 @section('title', 'Media Bookings')
 
+{{--
+  Media Bookings Dashboard
+  This view displays a table of all hall bookings that require action or review 
+  from the Media team (e.g. photography, videography). It includes a modal
+  interface for accepting, rejecting, or pending media requests.
+--}}
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     @if (session('success'))
@@ -37,6 +43,7 @@
                                 <td colspan="7" class="text-center text-muted">No media requests found.</td>
                             </tr>
                         @else
+                            {{-- Loop through each booking and determine the color of the status badge --}}
                             @foreach($bookings as $booking)
                                 @php
                                     $mBadge = 'warning';
@@ -124,7 +131,12 @@
     </div>
 </div>
 
-<!-- Media Feedback Modal -->
+{{-- 
+  Media Feedback Modal 
+  This modal is triggered by the action buttons in the table. Dynamic data 
+  (booking ID, action URL, request items) are passed via HTML custom data attributes 
+  and populated into the form using JavaScript below.
+--}}
 <div class="modal fade" id="mediaFeedbackModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -166,6 +178,8 @@
 </div>
 
 <script>
+// Script to comprehensively handle the dynamic population of the Feedback Modal
+// and enforce form validation (making sure checkboxes are checked when rejecting).
 document.addEventListener('DOMContentLoaded', function() {
     const feedbackModal = document.getElementById('mediaFeedbackModal');
     if (feedbackModal) {

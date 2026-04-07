@@ -8,10 +8,22 @@ use App\Models\HallImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * HallController (Admin)
+ * 
+ * Handles administrative operations for Halls, including creating, reading,
+ * updating, and deleting physical halls globally across all campuses.
+ * Also manages hall image uploads and deletions.
+ */
 class HallController extends Controller
 {
     /**
-     * Display a listing of halls
+     * Display a paginated list of all halls.
+     * 
+     * Supports basic searching functionality, filtering results by name, campus, or location.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\View\View
      */
     public function index(Request $request)
     {
@@ -81,7 +93,13 @@ class HallController extends Controller
     }
 
     /**
-     * Store a newly created hall in database
+     * Store a newly created hall in the database.
+     * 
+     * Validates input criteria and processes multiple image file uploads,
+     * storing the physical files and writing image paths securely alongside the new hall.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -154,7 +172,14 @@ class HallController extends Controller
     }
 
     /**
-     * Update the specified hall in database
+     * Update the specified hall details in the database.
+     * 
+     * Handles validating and updating textual data and appending newly uploaded images 
+     * securely to the existing hall configuration.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Hall $hall
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Hall $hall)
     {
@@ -195,7 +220,13 @@ class HallController extends Controller
     }
 
     /**
-     * Remove the specified hall from database
+     * Remove the specified hall from the database completely.
+     * 
+     * Crucially, this includes cleaning up and deleting physical image files from 
+     * the server's public storage disk to prevent orphaned storage bloat.
+     *
+     * @param \App\Models\Hall $hall
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Hall $hall)
     {

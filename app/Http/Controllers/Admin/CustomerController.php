@@ -6,10 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 
+/**
+ * CustomerController (Admin)
+ * 
+ * Manages operations related to system users (often referred to as 'customers' or 'staff'
+ * in different contexts) specifically for administrative oversight.
+ */
 class CustomerController extends Controller
 {
     /**
-     * Display a listing of staff
+     * Display a paginated list of all users with the 'customer' role.
+     * 
+     * Includes a count of bookings associated with each user.
+     *
+     * @return \Illuminate\View\View
      */
     public function index()
     {
@@ -22,7 +32,12 @@ class CustomerController extends Controller
     }
 
     /**
-     * Display the specified staff
+     * Display detailed information and booking history for a specific customer.
+     * 
+     * Aborts with a 404 error if the requested user does not have the 'customer' role.
+     *
+     * @param \App\Models\User $customer The user to display
+     * @return \Illuminate\View\View
      */
     public function show(User $customer)
     {
@@ -39,7 +54,13 @@ class CustomerController extends Controller
     }
 
     /**
-     * Remove the specified staff
+     * Remove the specified customer/staff member from the database.
+     * 
+     * Checks are applied to ensure only users with the 'customer' role can be deleted
+     * and prevents deletion if they currently have active (confirmed) bookings.
+     *
+     * @param \App\Models\User $customer The user to delete
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(User $customer)
     {

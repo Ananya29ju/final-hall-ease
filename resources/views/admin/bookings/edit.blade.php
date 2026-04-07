@@ -69,7 +69,7 @@
 
                 {{-- Hall --}}
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Select Hall</label>
+                    <label class="form-label">Select Hall <span class="text-danger">*</span></label>
                     <select name="hall_id" class="form-select" required>
                         @foreach($halls as $hall)
                             <option value="{{ $hall->id }}"
@@ -82,7 +82,7 @@
 
                 {{-- Staff --}}
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Select Staff</label>
+                    <label class="form-label">Select Staff <span class="text-danger">*</span></label>
                     <select name="customer_id" class="form-select" required>
                         @foreach($customers as $customer)
                             <option value="{{ $customer->id }}"
@@ -102,13 +102,13 @@
                         <span class="range-label"><i class="bx bx-log-in-circle me-1"></i> Start</span>
                         <div class="row mt-2">
                             <div class="col-sm-6 mb-2 mb-sm-0">
-                                <label class="form-label">Start Date</label>
+                                <label class="form-label">Start Date <span class="text-danger">*</span></label>
                                 <input type="date" name="start_date"
                                        value="{{ old('start_date', optional($booking->start_datetime)->format('Y-m-d')) }}"
                                        class="form-control" required>
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">Start Time</label>
+                                <label class="form-label">Start Time <span class="text-danger">*</span></label>
                                 <input type="time" name="start_time"
                                        value="{{ old('start_time', optional($booking->start_datetime)->format('H:i')) }}"
                                        class="form-control" required>
@@ -126,13 +126,13 @@
                         <span class="range-label"><i class="bx bx-log-out-circle me-1"></i> End</span>
                         <div class="row mt-2">
                             <div class="col-sm-6 mb-2 mb-sm-0">
-                                <label class="form-label">End Date</label>
+                                <label class="form-label">End Date <span class="text-danger">*</span></label>
                                 <input type="date" name="end_date"
                                        value="{{ old('end_date', optional($booking->end_datetime)->format('Y-m-d')) }}"
                                        class="form-control" required>
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">End Time</label>
+                                <label class="form-label">End Time <span class="text-danger">*</span></label>
                                 <input type="time" name="end_time"
                                        value="{{ old('end_time', optional($booking->end_datetime)->format('H:i')) }}"
                                        class="form-control" required>
@@ -161,12 +161,12 @@
                 <div class="d-flex flex-wrap gap-3">
                     @foreach([
                         'projector' => 'Projector',
-                        'mics' => 'Mics',
+                        'mic' => 'Mic',
                         'chairs' => 'Chairs',
                         'tables' => 'Tables',
-                        'sapling' => 'Sapling',
-                        'glass_and_water' => 'Glass and Water',
-                        'other' => 'others'
+                        'saplings' => 'Saplings',
+                        'water_bottles' => 'Water bottles',
+                        'other' => 'Others'
                     ] as $value => $label)
                         <div class="form-check">
                             <input class="form-check-input"

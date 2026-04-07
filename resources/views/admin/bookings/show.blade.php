@@ -44,12 +44,12 @@
                                 @php
                                     $resourceLabels = [
                                         'projector' => 'Projector',
-                                        'mics' => 'Mics',
+                                        'mic' => 'Mic',
                                         'chairs' => 'Chairs',
                                         'tables' => 'Tables',
-                                        'sapling' => 'Sapling',
-                                        'glass_and_water' => 'Glass and Water',
-                                        'other' => 'others',
+                                        'saplings' => 'Saplings',
+                                        'water_bottles' => 'Water bottles',
+                                        'other' => 'Others',
                                     ];
 
                                     $resources = collect($booking->resources ?? [])

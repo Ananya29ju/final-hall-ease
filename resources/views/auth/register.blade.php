@@ -52,29 +52,29 @@
                     <form id="formAuthentication" class="mb-6" action="{{ route('register-store') }}" method="POST">
                         @csrf
                         <div class="mb-6">
-                            <label for="name" class="form-label">Full Name</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" placeholder="Enter your full name" autofocus autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" />
+                            <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" placeholder="Enter your full name" autofocus autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" required />
                             @error('name')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-6">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" placeholder="Enter your email" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" />
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" placeholder="Enter your email" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" required />
                             @error('email')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-6">
-                            <label for="phone" class="form-label">Phone (Optional)</label>
-                            <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" placeholder="Enter your phone number" autocomplete="off" />
+                            <label for="phone" class="form-label">Phone <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" placeholder="Enter your phone number" autocomplete="off" required />
                             @error('phone')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-6">
-                            <label for="role" class="form-label">Select Role</label>
-                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role">
+                            <label for="role" class="form-label">Select Role <span class="text-danger">*</span></label>
+                            <select class="form-select @error('role') is-invalid @enderror" id="role" name="role" required>
                                 <option value="" disabled selected>Choose your role...</option>
                                 <option value="user">Staff</option>
                                 <option value="media">Media Team</option>
@@ -84,9 +84,9 @@
                             @enderror
                         </div>
                         <div class="mb-6 form-password-toggle">
-                            <label class="form-label" for="password">Password</label>
+                            <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
                             <div class="input-group input-group-merge">
-                                <input type="password" id="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');" />
+                                <input type="password" id="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');" required />
                                 <span class="input-group-text cursor-pointer"><i class="icon-base bx bx-hide"></i></span>
                             </div>
                             @error('password')
@@ -94,9 +94,9 @@
                             @enderror
                         </div>
                         <div class="mb-6 form-password-toggle">
-                            <label class="form-label" for="password_confirmation">Confirm Password</label>
+                            <label class="form-label" for="password_confirmation">Confirm Password <span class="text-danger">*</span></label>
                             <div class="input-group input-group-merge">
-                                <input type="password" id="password_confirmation" class="form-control @error('password_confirmation') is-invalid @enderror" name="password_confirmation" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');" />
+                                <input type="password" id="password_confirmation" class="form-control @error('password_confirmation') is-invalid @enderror" name="password_confirmation" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password_confirmation" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');" required />
                                 <span class="input-group-text cursor-pointer"><i class="icon-base bx bx-hide"></i></span>
                             </div>
                             @error('password_confirmation')

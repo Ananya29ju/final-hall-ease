@@ -10,10 +10,23 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * DashboardController (Admin)
+ * 
+ * Handles the logic and data aggregation for the administrative dashboard,
+ * displaying key metrics like total users, halls, bookings, and rendering 
+ * the administrative calendar view.
+ */
 class DashboardController extends Controller
 {
     /**
-     * Display admin dashboard
+     * Display the admin dashboard with aggregated statistics.
+     * 
+     * Retrieves all bookings for the calendar, checking database schema for
+     * cancellation fields. Also gathers total counts for users, halls, and events 
+     * to populate the admin overview panel.
+     *
+     * @return \Illuminate\View\View
      */
     public function index()
     {

@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * StaffController (Admin)
+ * 
+ * Manages the creation, role assignment, updating, and deletion of staff, admins,
+ * and media personnel. Also enforces strict institutional email validation policies.
+ */
 class StaffController extends Controller
 {
     /**
@@ -85,7 +91,13 @@ class StaffController extends Controller
     }
 
     /**
-     * Store a newly created user account.
+     * Store a newly created user (or media) account based on administrative input.
+     * 
+     * Enforces strict validation rules, including a custom closure to ensure the email
+     * ends with the `@staloysius.edu.in` domain before proceeding to create the user account.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function storeUser(Request $request)
     {
@@ -138,7 +150,15 @@ class StaffController extends Controller
     }
 
     /**
-     * Update the specified staff member
+     * Update the specified staff member's core configuration and roles.
+     * 
+     * Performs strict email validation to enforce the institutional domain limit. 
+     * Furthermore, it checks if the administrator is updating their *own* role, 
+     * and updates their active session dashboard route dynamically if they do so.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\User $staff
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, User $staff)
     {

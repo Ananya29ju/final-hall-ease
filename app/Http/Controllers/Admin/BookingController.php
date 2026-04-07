@@ -12,10 +12,22 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Carbon;
 use App\Notifications\BookingStatusUpdated;
 
+/**
+ * BookingController (Admin)
+ * 
+ * Central controller for managing all hall bookings from an administrative perspective.
+ * Handles viewing booking statuses, manual creation of bookings, resolving conflicts (availability),
+ * and updating status (approving, rejecting, or cancelling). Also emits notifications to staff and media.
+ */
 class BookingController extends Controller
 {
     /**
-     * Display all bookings
+     * Display the main management dashboard for bookings.
+     * 
+     * Groups bookings into logical panels: pending, upcoming, completed, and cancelled.
+     * Evaluates schemas dynamically to ensure 'cancellation_reason' backward compatibility.
+     *
+     * @return \Illuminate\View\View
      */
     public function index()
     {
@@ -98,7 +110,13 @@ class BookingController extends Controller
     }
 
     /**
-     * Store booking
+     * Store a new booking directly created by an administrator.
+     * 
+     * Performs rigorous validation on datetimes, verifies resource details, checks
+     * for 30-minute availability buffers using the Booking model, and saves the request.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -115,7 +133,16 @@ class BookingController extends Controller
             'coordinator_name' => 'required|string|max:255',
             'coordinator_phone' => 'required|string|max:20',
             'coordinator_department' => 'required|string|max:255',
-            'coordinator_email' => 'required|email|max:255',
+            'coordinator_email' => [
+                'required',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if (!str_ends_with(strtolower($value), '@staloysius.edu.in')) {
+                        $fail('Only institutional email addresses ending with @staloysius.edu.in are allowed.');
+                    }
+                },
+            ],
             'coordinator_emergency_number' => 'required|string|max:20',
             'media_requirements' => 'nullable|array',
             'media_requirements.*' => 'in:photography,videography,livestreaming,reels,photos,others',
@@ -168,6 +195,7 @@ class BookingController extends Controller
             return back()->with('error', $availability['message'])->withInput();
         }
 
+        $mediaReqs = $request->input('media_requirements', []);
         Booking::create([
             'hall_id' => $request->hall_id,
             'customer_id' => $request->customer_id,
@@ -175,6 +203,8 @@ class BookingController extends Controller
             'start_datetime' => $startDatetime,
             'end_datetime' => $endDatetime,
             'booking_status' => 'confirmed',
+            'admin_status' => 'approved',
+            'media_status' => count($mediaReqs) > 0 ? 'pending' : 'not_required',
             'event_name' => $request->event_name,
             'event_department' => $request->event_department,
             'event_type' => $request->event_type,
@@ -183,7 +213,7 @@ class BookingController extends Controller
             'coordinator_department' => $request->coordinator_department,
             'coordinator_email' => $request->coordinator_email,
             'coordinator_emergency_number' => $request->coordinator_emergency_number,
-            'media_requirements' => $request->input('media_requirements', []),
+            'media_requirements' => $mediaReqs,
             'media_requirements_other' => $request->media_requirements_other,
             'resources' => $request->input('resources', []),
             'resources_other' => $request->resources_other,
@@ -285,7 +315,15 @@ class BookingController extends Controller
     }
 
     /**
-     * Update booking cancellation reason
+     * Update the administrative status of a booking (approve/reject).
+     * 
+     * Updates the booking to 'confirmed' if no media is needed, or 'waiting for media'
+     * if media is required. Automatically fires email/system notifications to the original
+     * staff member and the media team if their services are requested.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Booking $booking
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function updateStatus(Request $request, Booking $booking)
     {
@@ -409,7 +447,13 @@ class BookingController extends Controller
     }
 
     /**
-     * AJAX endpoint to check availability
+     * AJAX endpoint used by the frontend to dynamically check hall availability.
+     * 
+     * Receives a hall ID and datetime range, returning any exact overlap or buffer conflicts
+     * alongside a friendly list of booked ranges to display to the user in the UI.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function checkAvailability(Request $request)
     {

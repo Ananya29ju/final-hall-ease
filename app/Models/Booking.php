@@ -6,10 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
+/**
+ * Booking Model
+ * 
+ * Represents a hall booking request within the application.
+ * Manages relationships with the hall, customer, user, and images,
+ * and handles custom logic for availability and status checks.
+ */
 class Booking extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'hall_id',
         'customer_id',
@@ -40,6 +52,11 @@ class Booking extends Model
     ];
 
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
     protected $casts = [
         'start_datetime' => 'datetime',
         'end_datetime' => 'datetime',
@@ -50,36 +67,61 @@ class Booking extends Model
     ];
 
 
+    /**
+     * Define the relationship: A Booking belongs to a specific Hall.
+     */
     public function hall()
     {
         return $this->belongsTo(Hall::class);
     }
 
+    /**
+     * Define the relationship: A Booking belongs to a Customer (User).
+     */
     public function customer()
     {
         return $this->belongsTo(User::class, 'customer_id');
     }
 
+    /**
+     * Define the relationship: A Booking belongs to a regular User.
+     */
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * Define the relationship: The User who created this Booking.
+     */
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * Define the relationship: A Booking can have multiple uploaded images.
+     */
     public function images()
     {
         return $this->hasMany(HallImage::class);
     }
 
+    /**
+     * Check if this booking requires media resources.
+     *
+     * @return bool
+     */
     public function requiresMedia()
     {
         return !empty($this->media_requirements) && count($this->media_requirements) > 0;
     }
 
+    /**
+     * Check if this booking has been fully approved by both admin and media (if applicable).
+     *
+     * @return bool
+     */
     public function isFullyApproved()
     {
         if ($this->admin_status !== 'approved') {

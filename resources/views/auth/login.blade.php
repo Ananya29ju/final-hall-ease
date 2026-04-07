@@ -75,11 +75,7 @@
                             @enderror
                         </div>
                         <div class="mb-8">
-                            <div class="d-flex justify-content-between">
-                                <div class="form-check mb-0">
-                                    <input class="form-check-input" type="checkbox" id="remember-me" name="remember" />
-                                    <label class="form-check-label" for="remember-me"> Remember Me </label>
-                                </div>
+                            <div class="d-flex justify-content-end">
                                 <a href="{{ route('password.request') }}">
                                     <span>Forgot Password?</span>
                                 </a>

@@ -2,6 +2,12 @@
 
 @section('title', 'Cancel Booking')
 
+{{--
+  Admin Booking Cancellation Overview
+  Provides an administrative interface to rapidly cancel upcoming bookings.
+  Displays the bookings as visual cards and enforces rules on which bookings 
+  are eligible for cancellation.
+--}}
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="card">
@@ -33,6 +39,7 @@
                 </div>
             @else
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {{-- Render a display card for each individual booking --}}
                     @foreach($bookings as $booking)
                         <div class="col">
                             <div class="card h-100 border shadow-none {{ $booking->booking_status === 'cancelled' ? 'bg-label-secondary border-secondary' : 'border-primary' }}">
@@ -59,7 +66,8 @@
                                 </div>
                                 <div class="card-footer bg-transparent border-top mt-auto pt-3">
                                     @php
-                                        // Disable cancel if it's already cancelled, completed, or if the event is strictly in the past
+                                        // Disable the cancel button if the booking is already strictly cancelled, 
+                                        // completed, rejected, or if its scheduled end time is in the past.
                                         $isPast = $booking->end_datetime && $booking->end_datetime->isPast();
                                         $isDisabled = in_array($booking->booking_status, ['cancelled', 'completed', 'rejected']) || $isPast;
                                     @endphp
@@ -81,7 +89,11 @@
     </div>
 </div>
 
-<!-- Cancellation Modal -->
+{{-- 
+  Cancellation Modal
+  Captures the specific radio-button reason for cancelling the booking (e.g. postponed, event cancelled) 
+  so that accurate reports can be generated later by admins.
+--}}
 <div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-danger">

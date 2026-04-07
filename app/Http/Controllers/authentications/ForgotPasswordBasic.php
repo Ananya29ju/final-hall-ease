@@ -42,7 +42,7 @@ class ForgotPasswordBasic extends Controller
                 'email',
                 function ($attribute, $value, $fail) {
                     if (strtolower($value) !== 'admin@example.com' && !str_ends_with(strtolower($value), '@staloysius.edu.in')) {
-                        $fail('pls use institution email id to login or create account or register');
+                        $fail('Only institutional email addresses ending with @staloysius.edu.in are allowed.');
                     }
                 },
             ],
@@ -73,7 +73,15 @@ class ForgotPasswordBasic extends Controller
     {
         $request->validate([
             'token' => ['required', 'string'],
-            'email' => ['required', 'email'],
+            'email' => [
+                'required',
+                'email',
+                function ($attribute, $value, $fail) {
+                    if (strtolower($value) !== 'admin@example.com' && !str_ends_with(strtolower($value), '@staloysius.edu.in')) {
+                        $fail('Only institutional email addresses ending with @staloysius.edu.in are allowed.');
+                    }
+                },
+            ],
             'password' => ['required', 'confirmed', PasswordRule::min(6)],
         ]);
 

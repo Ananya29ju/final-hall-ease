@@ -2,6 +2,14 @@
 
 @section('title', 'New Booking')
 
+{{--
+  User Booking Request Form
+  This view presents the user-facing interface for creating a new hall booking request.
+  Features include:
+   1. A visual "hero" section displaying the selected hall's details.
+   2. Intelligent datetime selectors with real-time UI duration checks.
+   3. Event details, coordinator fields, and media/resource requirements.
+--}}
 @section('page-style')
 <style>
     .selected-hall-hero {
@@ -142,6 +150,7 @@
         @endif
 
         @if(!empty($selectedHall))
+            {{-- Selected Hall Hero Component: Renders the top block with an image carousel and hall details --}}
             @php
                 $hallImageUrls = $selectedHall->images
                     ->pluck('image_path')
@@ -233,19 +242,23 @@
         <form action="{{ route('user.bookings.store') }}" method="POST">
             @csrf
 
-            <div class="row">
-                <div class="col-md-12 mb-3">
-                    <label class="form-label">Select Hall</label>
-                    <select name="hall_id" id="hall_id" class="form-select" required>
-                        <option value="">Choose Hall</option>
-                        @foreach($halls as $hall)
-                            <option value="{{ $hall->id }}" {{ (string) old('hall_id', $selectedHallId ?? '') === (string) $hall->id ? 'selected' : '' }}>
-                                {{ $hall->name }}
-                            </option>
-                        @endforeach
-                    </select>
+            @if(empty($selectedHall))
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Select Hall <span class="text-danger">*</span></label>
+                        <select name="hall_id" id="hall_id" class="form-select" required>
+                            <option value="">Choose Hall</option>
+                            @foreach($halls as $hall)
+                                <option value="{{ $hall->id }}" {{ (string) old('hall_id', $selectedHallId ?? '') === (string) $hall->id ? 'selected' : '' }}>
+                                    {{ $hall->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-            </div>
+            @else
+                <input type="hidden" name="hall_id" id="hall_id" value="{{ $selectedHall->id }}">
+            @endif
 
             @php
                 // Generate time options with 30-min intervals from 7:00 AM to 10:00 PM
@@ -259,8 +272,9 @@
                 }
             @endphp
 
-            {{-- Start Date/Time → End Date/Time --}}
+            {{-- Scheduled Booking Start/End Time Section --}}
             <div class="card mb-4 border-primary">
+                {{-- Date/Time Selectors featuring real-time UI duration calculations --}}
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bx bx-calendar-check me-2"></i>Booking Schedule</h5>
                 </div>
@@ -271,11 +285,11 @@
                             <div class="h-100 p-3 rounded bg-light border d-flex flex-column">
                                 <h6 class="text-primary mb-3"><i class="bx bx-log-in-circle me-1"></i> Start</h6>
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold small text-muted mb-1">Date</label>
+                                    <label class="form-label fw-semibold small text-muted mb-1">Date <span class="text-danger">*</span></label>
                                     <input type="date" name="start_date" id="start_date" value="{{ old('start_date') }}" class="form-control" required>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <label class="form-label fw-semibold small text-muted mb-1">Time</label>
+                                    <label class="form-label fw-semibold small text-muted mb-1">Time <span class="text-danger">*</span></label>
                                     <select name="start_time" id="start_time" class="form-select" required>
                                         <option value="">Select Time</option>
                                         @foreach($timeOptions as $value => $label)
@@ -310,11 +324,11 @@
                             <div class="h-100 p-3 rounded bg-light border d-flex flex-column">
                                 <h6 class="text-primary mb-3"><i class="bx bx-log-out-circle me-1"></i> End</h6>
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold small text-muted mb-1">Date</label>
+                                    <label class="form-label fw-semibold small text-muted mb-1">Date <span class="text-danger">*</span></label>
                                     <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}" class="form-control" required>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <label class="form-label fw-semibold small text-muted mb-1">Time</label>
+                                    <label class="form-label fw-semibold small text-muted mb-1">Time <span class="text-danger">*</span></label>
                                     <select name="end_time" id="end_time" class="form-select" required>
                                         <option value="">Select Time</option>
                                         @foreach($timeOptions as $value => $label)
@@ -352,11 +366,11 @@
             <h5 class="mb-3">Event Details</h5>
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Event Name</label>
+                    <label class="form-label">Event Name <span class="text-danger">*</span></label>
                     <input type="text" name="event_name" value="{{ old('event_name') }}" class="form-control" required>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Department</label>
+                    <label class="form-label">Department <span class="text-danger">*</span></label>
                     <select name="event_department" class="form-select" required>
                         <option value="">Select Department</option>
                         @foreach(['BA', 'BCA', 'BSC', 'BCOM', 'BBA', 'BVOC'] as $dept)
@@ -365,7 +379,7 @@
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Event Type</label>
+                    <label class="form-label">Event Type <span class="text-danger">*</span></label>
                     <select name="event_type" class="form-select" required>
                         <option value="">Select Event Type</option>
                         @foreach(['InterClass', 'InterCollege', 'District', 'State', 'National', 'InterNational', 'Seminar', 'Webinar', 'Conferance', 'Workshop'] as $type)
@@ -379,23 +393,23 @@
             <h5 class="mb-3">Coordinator Details</h5>
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Coordinator Name</label>
+                    <label class="form-label">Coordinator Name <span class="text-danger">*</span></label>
                     <input type="text" name="coordinator_name" value="{{ old('coordinator_name') }}" class="form-control" required>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Phone Number</label>
+                    <label class="form-label">Phone Number <span class="text-danger">*</span></label>
                     <input type="text" name="coordinator_phone" value="{{ old('coordinator_phone') }}" class="form-control" required>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Department</label>
+                    <label class="form-label">Department <span class="text-danger">*</span></label>
                     <input type="text" name="coordinator_department" value="{{ old('coordinator_department') }}" class="form-control" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Email ID</label>
+                    <label class="form-label">Email ID <span class="text-danger">*</span></label>
                     <input type="email" name="coordinator_email" value="{{ old('coordinator_email') }}" class="form-control" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Emergency Number</label>
+                    <label class="form-label">Emergency Number <span class="text-danger">*</span></label>
                     <input type="text" name="coordinator_emergency_number" value="{{ old('coordinator_emergency_number') }}" class="form-control" required>
                 </div>
             </div>
@@ -448,12 +462,12 @@
                     <div class="d-flex flex-wrap gap-3">
                         @foreach([
                             'projector' => 'Projector',
-                            'mics' => 'Mics',
+                            'mic' => 'Mic',
                             'chairs' => 'Chairs',
                             'tables' => 'Tables',
-                            'sapling' => 'Sapling',
-                            'glass_and_water' => 'Glass and Water',
-                            'other' => 'others'
+                            'saplings' => 'Saplings',
+                            'water_bottles' => 'Water bottles',
+                            'other' => 'Others'
                         ] as $value => $label)
                             <div class="form-check">
                                 <input class="form-check-input"
@@ -507,6 +521,12 @@
 
 @section('page-script')
 <script>
+{{--
+  Booking Availability & Validation Script (User Side)
+  - Uses `debounceTimer` to throttle availability check requests to the server.
+  - Automatically identifies overlapping bookings and throws an error if conflicts exist.
+  - Shows visual feedback for availability status.
+--}}
 document.addEventListener('DOMContentLoaded', function() {
     const hallSelect = document.getElementById('hall_id');
     const startDateInput = document.getElementById('start_date');
@@ -515,8 +535,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const endTimeInput = document.getElementById('end_time');
     const warningDiv = document.getElementById('availability-warning');
     const warningMsg = document.getElementById('availability-message');
-    const submitBtn = document.querySelector('button[type="submit"]');
     const bookingForm = document.querySelector('form[action="{{ route('user.bookings.store') }}"]');
+    const submitBtn = bookingForm.querySelector('button[type="submit"]');
 
     const bookedSlotsContainer = document.getElementById('booked-slots-container');
     const bookedSlotsList = document.getElementById('booked-slots-list');

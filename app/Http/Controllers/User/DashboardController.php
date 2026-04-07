@@ -9,10 +9,23 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * DashboardController (User)
+ * 
+ * Handles the logic for displaying the regular user (staff) dashboard.
+ * This includes retrieving their personal booking statistics, upcoming bookings,
+ * available halls, and formatting data for a calendar view.
+ */
 class DashboardController extends Controller
 {
     /**
-     * Display user dashboard.
+     * Display the user dashboard.
+     * 
+     * Dynamically identifies the correct user column based on the database schema
+     * (either 'customer_id' or 'user_id'), calculates booking stats, and retrieves
+     * calendar events to render on the dashboard view.
+     * 
+     * @return \Illuminate\View\View
      */
     public function index()
     {

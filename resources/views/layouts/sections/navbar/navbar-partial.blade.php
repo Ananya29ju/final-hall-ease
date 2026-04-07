@@ -67,8 +67,18 @@ $userInitial = strtoupper(substr(Auth::user()->name ?? 'U', 0, 1));
         @empty
         @endforelse
 
+        <!-- Direct Logout Button -->
+        <li class="nav-item ms-auto me-3 d-flex align-items-center">
+            <form method="POST" action="{{ route('logout') }}" class="m-0">
+                @csrf
+                <button type="submit" class="btn btn-danger btn-sm d-flex align-items-center">
+                    <i class="icon-base bx bx-power-off me-1"></i><span>Logout</span>
+                </button>
+            </form>
+        </li>
+
         <!-- User -->
-        <li class="nav-item navbar-dropdown dropdown-user dropdown ms-auto">
+        <li class="nav-item navbar-dropdown dropdown-user dropdown">
             <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
                 <div class="avatar avatar-online">
                     <span class="w-px-40 h-px-40 rounded-circle d-flex align-items-center justify-content-center fw-semibold text-white" style="background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5);">

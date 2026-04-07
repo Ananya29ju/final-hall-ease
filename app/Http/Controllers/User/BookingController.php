@@ -130,7 +130,16 @@ class BookingController extends Controller
             'coordinator_name' => 'required|string|max:255',
             'coordinator_phone' => 'required|string|max:20',
             'coordinator_department' => 'required|string|max:255',
-            'coordinator_email' => 'required|email|max:255',
+            'coordinator_email' => [
+                'required',
+                'email',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if (!str_ends_with(strtolower($value), '@staloysius.edu.in')) {
+                        $fail('Only institutional email addresses ending with @staloysius.edu.in are allowed.');
+                    }
+                },
+            ],
             'coordinator_emergency_number' => 'required|string|max:20',
             'media_requirements' => 'nullable|array',
             'media_requirements.*' => 'in:photography,videography,livestreaming,reels,photos,others',

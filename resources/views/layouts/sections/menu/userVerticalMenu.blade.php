@@ -66,14 +66,6 @@
             </a>
         </li>
 
-        <li class="menu-item mb-2 mt-auto">
-            <a href="{{ route('logout') }}" class="menu-link" onclick="event.preventDefault(); document.getElementById('user-sidebar-logout-form').submit();">
-                <i class="menu-icon tf-icons bx bx-log-out"></i>
-                <div>Logout</div>
-            </a>
-            <form id="user-sidebar-logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                @csrf
-            </form>
-        </li>
+
     </ul>
 </aside>

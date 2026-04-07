@@ -43,7 +43,7 @@ class LoginBasic extends Controller
                     if ($lowerValue === 'admin@example.com') return; // Allow legacy admin
                     
                     if (!str_ends_with($lowerValue, '@staloysius.edu.in')) {
-                        $fail('pls use institution email id to login or create account or register');
+                        $fail('Only institutional email addresses ending with @staloysius.edu.in are allowed.');
                     }
                 },
             ],

@@ -2,6 +2,12 @@
 
 @section('title', 'Bookings')
 
+{{--
+  Admin Bookings Index
+  This is the main management dashboard for bookings. It displays multiple tables
+  categorized into: Pending Action, Upcoming, Completed, and Cancelled.
+  It also uses an inline PHP closure to render table rows dynamically.
+--}}
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     @if (session('success'))
@@ -115,6 +121,7 @@
     @endphp
 
     <div class="card mb-4 border-primary">
+        {{-- Section 1: Pending Action Bookings (High Priority) --}}
         <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
             <h6 class="mb-0 text-white">Pending Action Bookings</h6>
             <span class="badge bg-white text-primary">{{ $pendingActionBookings->count() }}</span>
@@ -147,6 +154,7 @@
     </div>
 
     <div class="card mb-4">
+        {{-- Section 2: Upcoming Approved Bookings --}}
         <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="mb-0">Upcoming Approved Bookings</h6>
             <span class="badge bg-success">{{ $upcomingBookings->count() }}</span>
@@ -179,6 +187,7 @@
     </div>
 
     <div class="card mb-4">
+        {{-- Section 3: Completed Bookings (Past items) --}}
         <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="mb-0">Completed (Done) Bookings</h6>
             <span class="badge bg-secondary">{{ $completedBookings->count() }}</span>
@@ -212,6 +221,7 @@
     </div>
 
     <div class="card">
+        {{-- Section 4: Cancelled Bookings (Tracking cancelled records) --}}
         <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="mb-0">Cancelled Bookings</h6>
             <span class="badge bg-danger">{{ $cancelledBookings->count() }}</span>

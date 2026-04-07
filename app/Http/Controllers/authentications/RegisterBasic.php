@@ -60,7 +60,7 @@ class RegisterBasic extends Controller
                     }
                 },
             ],
-            'phone'    => 'nullable|string|max:20',
+            'phone'    => 'required|string|max:20',
             'role'     => 'required|in:user,media',
             'password' => 'required|string|min:6|confirmed',
         ]);

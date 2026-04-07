@@ -18,9 +18,6 @@ class BookingController extends Controller
     public function index(Request $request)
     {
         $query = Booking::with(['hall', 'customer', 'user'])
-            ->where('admin_status', 'approved')
-            ->whereNotNull('media_requirements')
-            ->where('media_requirements', '!=', '[]')
             ->where('booking_status', '!=', 'cancelled');
             
         if ($request->filled('search')) {
